@@ -1,0 +1,26 @@
+services:
+  backend:
+    environment:
+      - HOSTNAME=localhost
+    volumes:
+      - ./backend/target:/app/target
+      - ./backend/src:/app/src
+
+  database:
+    ports:
+      - 5432:5432
+      
+  frontend:
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+    environment:
+      - HOSTNAME=localhost
+    ports:
+      - "3000:3000"
+

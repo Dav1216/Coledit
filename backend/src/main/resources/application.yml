@@ -1,0 +1,45 @@
+# =============================================================================
+# APPLICATION CONFIGURATION FILE (application.yml)
+# =============================================================================
+# This file contains configuration settings for the Spring Boot application.
+# It includes database, JPA, and security configurations.
+# =============================================================================
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG # Logging level for debug messages
+
+spring:
+  datasource:
+    url: jdbc:postgresql://database:5432/${POSTGRES_DB} # Database connection URL
+    username: ${POSTGRES_USER}  # Database username
+    password: ${POSTGRES_PASSWORD} # Database password
+    driver-class-name: org.postgresql.Driver # PostgreSQL driver class name
+  jpa:
+    hibernate:
+      ddl-auto: update # Hibernate DDL auto strategy (update database schema)
+    show-sql: true # Show SQL queries in logs
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect  # Hibernate dialect for PostgreSQL
+        check_nullability: true # Check nullability constraints in database
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY} # JWT secret key for token generation and validation
+    expire-time: 1920000 # JWT token expiration time (in seconds) ~ 30 minutes
+    forgot-password-expire-time: 1920000 # Expiration time for forgot password tokens (in seconds) ~ 30 minutes
+    refresh-time: 96000000 # Refresh token expiration time (in milliseconds) ~ 24 hours
+
+custom:
+  hostname: ${HOSTNAME} # Custom hostname configuration
+  # Chief account that it is created when the app is built
+  chiefemail: ${CHIEF_EMAIL}
+  chiefpassword: ${CHIEF_PASSWORD}

@@ -1,0 +1,57 @@
+services:
+  backend:
+    container_name: backend
+    restart: unless-stopped
+    depends_on:
+      - database
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PWD}
+      - POSTGRES_DB=${PG_DB}
+      - HOSTNAME=${DOMAIN_NAME}
+      - KEY_PASSWORD=${KEY_PASSWORD}
+      - CHIEF_EMAIL=${CHIEF_EMAIL}
+      - CHIEF_PASSWORD=${CHIEF_PASSWORD}
+    ports:
+      - "8080:8080"
+
+  database:
+    image: 'postgres:13.1-alpine'
+    container_name: database
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PWD}
+      - POSTGRES_DB=${PG_DB}
+    volumes:
+      - data:/var/lib/postgresql
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      # - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - HOSTNAME=${DOMAIN_NAME}
+
+  nginx:
+    container_name: nginx
+    restart: unless-stopped
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./certificates/localhost.crt:/app/certificates/localhost.crt
+      - ./certificates/localhost.key:/app/certificates/localhost.key
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  data:
