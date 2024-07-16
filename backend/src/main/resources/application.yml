@@ -33,7 +33,7 @@ spring:
 
 security:
   jwt:
-    secret-key: ${JWT_SECRET_KEY} # JWT secret key for token generation and validation
+    secret-key:  ${JWT_SECRET_KEY} # JWT secret key for token generation and validation
     expire-time: 1920000 # JWT token expiration time (in seconds) ~ 30 minutes
     forgot-password-expire-time: 1920000 # Expiration time for forgot password tokens (in seconds) ~ 30 minutes
     refresh-time: 96000000 # Refresh token expiration time (in milliseconds) ~ 24 hours
