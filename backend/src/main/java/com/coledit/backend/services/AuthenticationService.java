@@ -12,6 +12,7 @@ import com.coledit.backend.dtos.RegisterUserDTO;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.repositories.UserRepository;
 import com.coledit.backend.exceptions.EmailAlreadyInUseException;
+import com.coledit.backend.exceptions.UserNotFoundException;
 
 /**
  * Service class for handling user authentication and registration.
@@ -60,9 +61,9 @@ public class AuthenticationService {
         }
 
         User user = User.builder()
-        .email(input.getEmail())
-        .hashPassword(passwordEncoder.encode(input.getPassword()))
-        .roles(input.getRoles()).build();
+                .email(input.getEmail())
+                .hashPassword(passwordEncoder.encode(input.getPassword()))
+                .roles(input.getRoles()).build();
 
         return userRepository.save(user);
     }
@@ -79,6 +80,8 @@ public class AuthenticationService {
                         input.getEmail(),
                         input.getPassword()));
 
-        return userRepository.findByEmail(input.getEmail());
+        return userRepository.findByEmail(input.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + input.getEmail()));
+        
     }
 }

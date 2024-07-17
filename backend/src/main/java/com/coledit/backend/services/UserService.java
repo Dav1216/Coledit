@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.repositories.UserRepository;
 import com.coledit.backend.exceptions.EmailAlreadyInUseException;
+import com.coledit.backend.exceptions.UserNotFoundException;
 
 import jakarta.transaction.Transactional;
 
@@ -42,7 +43,8 @@ public class UserService {
      * @return The user with the specified ID.
      */
     public User getUser(String id) {
-        return userRepository.findByUserId(UUID.fromString(id));
+        return userRepository.findByUserId(UUID.fromString(id))
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 
     /**
@@ -51,9 +53,9 @@ public class UserService {
      * @param email The email address of the user.
      * @return The user with the specified email address.
      */
-
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
     }
 
     /**
@@ -63,6 +65,8 @@ public class UserService {
      * @param newUser The updated user object.
      * @return The updated user object.
      */
+
+    @Transactional
     public User updateUser(String id, User newUser) {
         newUser.setUserId(UUID.fromString(id));
         newUser.setHashPassword(passwordEncoder.encode(newUser.getHashPassword()));
@@ -76,8 +80,11 @@ public class UserService {
      * @param newUser The updated user object.
      * @return The updated user object.
      */
+
+    @Transactional
     public User updateUserByEmail(String email, User newUser) {
-        User existingUser = userRepository.findByEmail(email);
+        User existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
         if (existingUser != null) {
             newUser.setUserId(existingUser.getUserId());
             newUser.setHashPassword(passwordEncoder.encode(newUser.getHashPassword()));
@@ -92,6 +99,7 @@ public class UserService {
      * @param user The user object to add.
      * @return The added user object.
      */
+    @Transactional
     public User addUser(User user) {
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new EmailAlreadyInUseException("The email address is already in use: " + user.getEmail());

@@ -1,6 +1,5 @@
 package com.coledit.backend.configs;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.coledit.backend.entities.User;
+import com.coledit.backend.exceptions.UserNotFoundException;
 import com.coledit.backend.repositories.UserRepository;
 
 /**
@@ -35,7 +35,8 @@ public class ApplicationConfiguration {
     @Bean
     UserDetailsService userDetailsService() {
         return username -> {
-            User user = userRepository.findByEmail(username);
+            User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new UserNotFoundException("User not found with email: " + username));
             if (user != null) {
                 return user;
             }

@@ -16,7 +16,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -41,9 +41,11 @@ public class User implements UserDetails {
     private String hashPassword;
     private String roles;
 
-    @OneToMany
-    @JoinColumn(name = "note_id")
-    private Set<Note> notes;
+    @OneToMany(mappedBy = "owner")
+    private Set<Note> ownedNotes;
+
+    @ManyToMany(mappedBy = "collaborators")
+    private Set<Note> collaboratedNotes;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -54,7 +56,6 @@ public class User implements UserDetails {
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
         } else {
-            // Safe default if roles are null
             return Collections.emptyList();
         }
     }
