@@ -16,6 +16,4 @@ public class RegisterUserDTO {
     private String email;
     // Represents the inputed password
     private String password;
-    // Represents the inputed roles
-    private String roles;
 }

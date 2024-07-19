@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-  
+const nextConfig = {
+    env: {
+        HOSTNAME: process.env.HOSTNAME,
+    },
+};
 
 export default nextConfig;

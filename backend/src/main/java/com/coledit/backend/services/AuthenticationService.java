@@ -11,6 +11,9 @@ import com.coledit.backend.dtos.LoginUserDTO;
 import com.coledit.backend.dtos.RegisterUserDTO;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.repositories.UserRepository;
+
+import jakarta.transaction.Transactional;
+
 import com.coledit.backend.exceptions.EmailAlreadyInUseException;
 import com.coledit.backend.exceptions.UserNotFoundException;
 
@@ -55,15 +58,17 @@ public class AuthenticationService {
      * @return the registered user
      * @throws EmailAlreadyInUseException if the email is already in use
      */
+    @Transactional
     public User signup(RegisterUserDTO input) {
-        if (userRepository.findByEmail(input.getEmail()) != null) {
+        System.out.println("herre");
+        if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new EmailAlreadyInUseException("The email address is already in use: " + input.getEmail());
         }
-
+        System.out.println("herre2");
         User user = User.builder()
                 .email(input.getEmail())
                 .hashPassword(passwordEncoder.encode(input.getPassword()))
-                .roles(input.getRoles()).build();
+                .build();
 
         return userRepository.save(user);
     }

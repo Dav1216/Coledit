@@ -82,11 +82,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
         // If no tokens are found, proceed with the filter chain
         if (jwt == null) {
-            System.out.println("jwt is nulllllllll");
             filterChain.doFilter(request, response);
             return;
         }
-        System.out.println("jwt is not nulllllllll");
 
         try {
             final String userEmail = jwtService.extractUsername(jwt);

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -14,16 +16,20 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "notes")
 public class Note {
     @Id
     @Column(name = "note_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID noteId;
+    private String title;
     private String content;
 
     @ManyToOne
@@ -37,9 +43,4 @@ public class Note {
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> collaborators;
-
-    
-    public Note() {
-        this.noteId = UUID.randomUUID();
-    }
 }

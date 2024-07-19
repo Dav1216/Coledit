@@ -85,12 +85,10 @@ public class UserService {
     public User updateUserByEmail(String email, User newUser) {
         User existingUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
-        if (existingUser != null) {
-            newUser.setUserId(existingUser.getUserId());
-            newUser.setHashPassword(passwordEncoder.encode(newUser.getHashPassword()));
-            return userRepository.save(newUser);
-        }
-        return null; // Or throw an exception if the user is not found
+
+        newUser.setUserId(existingUser.getUserId());
+        newUser.setHashPassword(passwordEncoder.encode(newUser.getHashPassword()));
+        return userRepository.save(newUser);
     }
 
     /**
@@ -101,7 +99,7 @@ public class UserService {
      */
     @Transactional
     public User addUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()) != null) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new EmailAlreadyInUseException("The email address is already in use: " + user.getEmail());
         }
         user.setHashPassword(passwordEncoder.encode(user.getHashPassword()));
