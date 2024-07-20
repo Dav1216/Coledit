@@ -60,11 +60,10 @@ public class AuthenticationService {
      */
     @Transactional
     public User signup(RegisterUserDTO input) {
-        System.out.println("herre");
         if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new EmailAlreadyInUseException("The email address is already in use: " + input.getEmail());
         }
-        System.out.println("herre2");
+
         User user = User.builder()
                 .email(input.getEmail())
                 .hashPassword(passwordEncoder.encode(input.getPassword()))

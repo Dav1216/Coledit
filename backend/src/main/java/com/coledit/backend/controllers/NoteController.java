@@ -37,7 +37,6 @@ public class NoteController {
      */
     @PostMapping("/create")
     public ResponseEntity<Note> createNote(@RequestBody Note note) {
-        System.out.println("here");
         Note createdNote = noteService.createNote(note);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNote);
     }

@@ -59,8 +59,8 @@ public class SecurityConfiguration {
 
                 // .requestMatchers("/error").permitAll()
                 // // // Authentication endpoints
-                // .requestMatchers("/auth/**").hasAnyAuthority("CHIEF", "EDITOR", "USER")
-    
+                // .requestMatchers("/auth/**").permitAll()
+                // .requestMatchers("/user/add").hasAnyAuthority("CHIEF", "EDITOR", "USER", "ROLE_ADMIN")
                 // .anyRequest().authenticated() // Requires authentication for all other requests
                 )
                 .sessionManagement(session -> session
@@ -88,11 +88,8 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         // Sets the allowed origins for CORS
         configuration.setAllowedOrigins(List.of(
-                "https://" + hostname +":3000",
-                "http://" + hostname + ":3000",
-                "https://" + hostname,
-                "http://" + hostname,
-                "https://" + hostname + ":443"));
+                "https://" + hostname
+              ));
         // Sets the allowed HTTP methods for CORS
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS", "DELETE"));
         // Allows all headers for CORS

@@ -8,7 +8,6 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +17,7 @@ import com.coledit.backend.builders.CookieBuilder;
 import com.coledit.backend.dtos.LoginUserDTO;
 import com.coledit.backend.dtos.RegisterUserDTO;
 import com.coledit.backend.entities.User;
+import com.coledit.backend.exceptions.EmailAlreadyInUseException;
 import com.coledit.backend.repositories.UserRepository;
 import com.coledit.backend.services.AuthenticationService;
 import com.coledit.backend.services.JwtService;
@@ -60,15 +60,14 @@ public class AuthenticationController {
      */
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody RegisterUserDTO registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
+        try {
+            User registeredUser = authenticationService.signup(registerUserDto);
 
-        if (registeredUser == null) {
-            // User already exists
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(registeredUser);
+            return ResponseEntity.ok(registeredUser);
+
+        } catch (EmailAlreadyInUseException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
-
-        return ResponseEntity.ok(registeredUser);
     }
 
     /**
@@ -98,17 +97,17 @@ public class AuthenticationController {
                     .build();
             response.addCookie(token);
 
-            // Set the role token in a simple cookie, not HTTPOnly
-            Cookie roleCookie = new CookieBuilder()
-                    .setName("role")
-                    .setValue(authenticatedUser.getRoles())
+            // Set the id token in a simple cookie, not HTTPOnly
+            Cookie idCookie = new CookieBuilder()
+                    .setName("id")
+                    .setValue(authenticatedUser.getUserId().toString())
                     .setHttpOnly(false)
                     .setSecure(true)
                     .setPath("/")
                     .setMaxAge((int) jwtService.getExpirationTime())
                     .setSameSite("Lax")
                     .build();
-            response.addCookie(roleCookie);
+            response.addCookie(idCookie);
 
             return ResponseEntity.ok("Successfully authenticated!");
 
@@ -146,16 +145,16 @@ public class AuthenticationController {
                 .build();
         response.addCookie(token);
 
-        // Set the invalidated role token in a simple cookie, not HTTPOnly
-        Cookie roleCookie = new CookieBuilder()
-                .setName("role")
+        // Set the invalidated id in a simple cookie, not HTTPOnly
+        Cookie idCookie = new CookieBuilder()
+                .setName("id")
                 .setValue(null)
                 .setHttpOnly(false)
                 .setSecure(true)
                 .setPath("/")
                 .setMaxAge(0)
                 .build();
-        response.addCookie(roleCookie);
+        response.addCookie(idCookie);
 
         return ResponseEntity.ok("Successfully logged out!");
     }

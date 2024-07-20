@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.coledit.backend.entities.Note;
 import com.coledit.backend.entities.User;
+import com.coledit.backend.exceptions.UserNotFoundException;
 import com.coledit.backend.repositories.NoteRepository;
 import com.coledit.backend.repositories.UserRepository;
 
@@ -89,13 +90,11 @@ public class NoteService {
 
     public List<Note> getNotesByUser(String userId) {
         Optional<User> userOptional = userRepository.findById(UUID.fromString(userId));
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            List<Note> ownedNotes = noteRepository.findByOwner(user);
-            List<Note> collaboratedNotes = noteRepository.findByCollaboratorsContaining(user);
-            ownedNotes.addAll(collaboratedNotes);
-            return ownedNotes;
-        }
-        return null;
+
+        User user = userOptional.orElseThrow(() -> new UserNotFoundException("User not found with id: "));
+        List<Note> ownedNotes = noteRepository.findByOwner(user);
+        List<Note> collaboratedNotes = noteRepository.findByCollaboratorsContaining(user);
+        ownedNotes.addAll(collaboratedNotes);
+        return ownedNotes;
     }
 }

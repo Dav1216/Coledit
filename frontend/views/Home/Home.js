@@ -1,9 +1,21 @@
 "use client";
 
 import NoteList from '../../components/NoteList';
+import { getCookie } from 'cookies-next';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-const HomePage = () => {
-  const userId = "2dbb3a5c-b48f-4f92-b20d-992e4a839418";
+function Home() {
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const userIdFromCookie = getCookie('id');
+    console.log(userIdFromCookie)
+    if (userIdFromCookie) {
+      setUserId(userIdFromCookie);
+    }
+  }, []);
 
   return (
     <div>
@@ -13,4 +25,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Home;
