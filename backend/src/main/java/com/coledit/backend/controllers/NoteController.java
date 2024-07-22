@@ -141,9 +141,9 @@ public class NoteController {
      * @param userId the ID of the user.
      * @return a ResponseEntity containing a list of notes.
      */
-    @GetMapping("/getByUser/{userId}")
-    public ResponseEntity<List<Note>> getNotesByUser(@PathVariable String userId) {
-        List<Note> notes = noteService.getNotesByUser(userId);
+    @GetMapping("/getByUserEmail/{userEmail}")
+    public ResponseEntity<List<Note>> getNotesByUser(@PathVariable String userEmail) {
+        List<Note> notes = noteService.getNotesByUserEmail(userEmail);
         if (notes != null && !notes.isEmpty()) {
             return ResponseEntity.ok(notes);
         } else {

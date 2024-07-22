@@ -7,20 +7,22 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 function Home() {
-  const [userId, setUserId] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
 
   useEffect(() => {
-    const userIdFromCookie = getCookie('id');
-    console.log(userIdFromCookie)
-    if (userIdFromCookie) {
-      setUserId(userIdFromCookie);
+    const userEmailFromCookie = getCookie('email');
+    console.log("jere2");
+    console.log(userEmailFromCookie);
+    if (userEmailFromCookie) {
+      console.log("jere");
+      setUserEmail(userEmailFromCookie);
     }
   }, []);
 
   return (
     <div>
       <h1>ColEdit</h1>
-      <NoteList userId={userId} />
+      <NoteList userEmail={userEmail} />
     </div>
   );
 };

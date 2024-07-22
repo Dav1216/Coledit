@@ -88,10 +88,10 @@ public class NoteService {
         return null;
     }
 
-    public List<Note> getNotesByUser(String userId) {
-        Optional<User> userOptional = userRepository.findById(UUID.fromString(userId));
+    public List<Note> getNotesByUserEmail(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
-        User user = userOptional.orElseThrow(() -> new UserNotFoundException("User not found with id: "));
+        User user = userOptional.orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
         List<Note> ownedNotes = noteRepository.findByOwner(user);
         List<Note> collaboratedNotes = noteRepository.findByCollaboratorsContaining(user);
         ownedNotes.addAll(collaboratedNotes);

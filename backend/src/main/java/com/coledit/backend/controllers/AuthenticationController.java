@@ -98,16 +98,16 @@ public class AuthenticationController {
             response.addCookie(token);
 
             // Set the id token in a simple cookie, not HTTPOnly
-            Cookie idCookie = new CookieBuilder()
-                    .setName("id")
-                    .setValue(authenticatedUser.getUserId().toString())
+            Cookie emailCookie = new CookieBuilder()
+                    .setName("email")
+                    .setValue(authenticatedUser.getEmail())
                     .setHttpOnly(false)
                     .setSecure(true)
                     .setPath("/")
                     .setMaxAge((int) jwtService.getExpirationTime())
                     .setSameSite("Lax")
                     .build();
-            response.addCookie(idCookie);
+            response.addCookie(emailCookie);
 
             return ResponseEntity.ok("Successfully authenticated!");
 
@@ -146,15 +146,15 @@ public class AuthenticationController {
         response.addCookie(token);
 
         // Set the invalidated id in a simple cookie, not HTTPOnly
-        Cookie idCookie = new CookieBuilder()
-                .setName("id")
+        Cookie emailCookie = new CookieBuilder()
+                .setName("email")
                 .setValue(null)
                 .setHttpOnly(false)
                 .setSecure(true)
                 .setPath("/")
                 .setMaxAge(0)
                 .build();
-        response.addCookie(idCookie);
+        response.addCookie(emailCookie);
 
         return ResponseEntity.ok("Successfully logged out!");
     }

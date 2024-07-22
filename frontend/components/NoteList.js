@@ -9,7 +9,9 @@ function NoteList(props) {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUser/${props.userId}`);
+        console.log("dsfdsfadfsdf");
+        console.log(props.userEmail);
+        const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUserEmail/${props.userEmail}`);
         const data = await response.json();
         
         // Log the data to inspect its structure
@@ -26,7 +28,7 @@ function NoteList(props) {
       }
     };
     fetchNotes();
-  }, [props.userId]);
+  }, [props.userEmail]);
 
   const selectNote = (note) => {
     setSelectedNote(note);
