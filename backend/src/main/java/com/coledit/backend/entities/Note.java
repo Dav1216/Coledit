@@ -3,6 +3,8 @@ package com.coledit.backend.entities;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +36,7 @@ public class Note {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonManagedReference
     private User owner;
 
     @ManyToMany
@@ -42,5 +45,6 @@ public class Note {
         joinColumns = @JoinColumn(name = "note_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonManagedReference
     private List<User> collaborators;
 }

@@ -61,24 +61,24 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     }
                 }
 
-                if ("/addCollaborator".equals(requestURI)) {
+                if ("/note/addCollaborator".equals(requestURI)) {
                     Map<String, String[]> queryParams = request.getParameterMap();
                     String[] noteIds = queryParams.get("noteId");
                     String[] userIds = queryParams.get("userId");
-    
+
                     if (noteIds == null || userIds == null || noteIds.length == 0 || userIds.length == 0) {
                         response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters
                         return;
                     }
-    
-                    String noteId = noteIds[0]; 
-    
+
+                    String noteId = noteIds[0];
+
                     if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         return;
                     }
                 }
-    
+
                 break;
             case "GET", "UPDATE", "DELETE":
                 if (requestURI.startsWith("/note/get/") || requestURI.startsWith("/note/update/")
@@ -98,18 +98,18 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     }
                 }
 
-                if ("/removeCollaborator".equals(requestURI)) {
+                if ("/note/removeCollaborator".equals(requestURI)) {
                     Map<String, String[]> queryParams = request.getParameterMap();
                     String[] noteIds = queryParams.get("noteId");
                     String[] userIds = queryParams.get("userId");
-    
+
                     if (noteIds == null || userIds == null || noteIds.length == 0 || userIds.length == 0) {
                         response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters
                         return;
                     }
-    
-                    String noteId = noteIds[0]; 
-    
+
+                    String noteId = noteIds[0];
+
                     if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         return;
