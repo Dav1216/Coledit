@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import com.coledit.backend.helpers.FilterHelper;
 import com.coledit.backend.services.JwtService;
 
 import jakarta.servlet.FilterChain;
@@ -66,19 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String jwt = null;
-        Cookie[] cookies = request.getCookies();
-
-        // Extract JWT from cookies if they are present
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("token".equals(cookie.getName())) {
-                    jwt = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
+        String jwt = FilterHelper.getJwString(request);
     
         // If no tokens are found, proceed with the filter chain
         if (jwt == null) {

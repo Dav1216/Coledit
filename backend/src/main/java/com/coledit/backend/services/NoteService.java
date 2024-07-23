@@ -2,7 +2,9 @@ package com.coledit.backend.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -96,5 +98,10 @@ public class NoteService {
         List<Note> collaboratedNotes = noteRepository.findByCollaboratorsContaining(user);
         ownedNotes.addAll(collaboratedNotes);
         return ownedNotes;
+    }
+
+    public boolean isNoteIdAccessiblByUserEmail(String noteId, String userEmail) {
+        List<Note> acccessibleNotes = getNotesByUserEmail(userEmail);
+        return acccessibleNotes.stream().anyMatch(note -> note.getNoteId().toString().equals(noteId));
     }
 }

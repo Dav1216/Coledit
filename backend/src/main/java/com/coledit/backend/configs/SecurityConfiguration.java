@@ -25,6 +25,7 @@ public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Value("${custom.hostname}")
     private String hostname;
@@ -38,9 +39,11 @@ public class SecurityConfiguration {
      */
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
+            JwtAuthorizationFilter jwtAuthorizationFilter,
             AuthenticationProvider authenticationProvider) {
         this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
     }
 
     /**
@@ -69,9 +72,9 @@ public class SecurityConfiguration {
                 )
                 .authenticationProvider(authenticationProvider) // Sets the custom authentication provider
                 // Adds the JWT authentication filter before the username-password authentication filter
-                .cors(c -> c.configurationSource(corsConfigurationSource())) // Configures CORS
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(c -> c.configurationSource(corsConfigurationSource()))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT Authentication Filter
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class) 
+                .cors(c -> c.configurationSource(corsConfigurationSource()))      // Configures CORS
                 .requiresChannel(channel -> channel
                 .anyRequest()); // Requires HTTPS for all requests
 
