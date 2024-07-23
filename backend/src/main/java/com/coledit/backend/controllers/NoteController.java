@@ -127,7 +127,7 @@ public class NoteController {
      * @param userId the ID of the user to remove as a collaborator.
      * @return a ResponseEntity containing the updated note.
      */
-    @PostMapping("/removeCollaborator")
+    @DeleteMapping("/removeCollaborator")
     public ResponseEntity<Note> removeCollaborator(@RequestParam String noteId, @RequestParam String userId) {
         Note updatedNote = noteService.removeCollaborator(noteId, userId);
         if (updatedNote != null) {

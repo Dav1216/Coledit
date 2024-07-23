@@ -2,6 +2,7 @@ package com.coledit.backend.configs;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -59,11 +60,56 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                         return;
                     }
                 }
+
+                if ("/addCollaborator".equals(requestURI)) {
+                    Map<String, String[]> queryParams = request.getParameterMap();
+                    String[] noteIds = queryParams.get("noteId");
+                    String[] userIds = queryParams.get("userId");
+    
+                    if (noteIds == null || userIds == null || noteIds.length == 0 || userIds.length == 0) {
+                        response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters
+                        return;
+                    }
+    
+                    String noteId = noteIds[0]; 
+    
+                    if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        return;
+                    }
+                }
+    
                 break;
             case "GET", "UPDATE", "DELETE":
                 if (requestURI.startsWith("/note/get/") || requestURI.startsWith("/note/update/")
                         || requestURI.startsWith("/note/delete/")) {
-                    String noteId = extractNoteIdFromRequest(requestURI);
+                    String noteId = extractPathVarFromRequest(requestURI);
+                    if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        return;
+                    }
+                }
+
+                if (requestURI.startsWith("/note/getByUserEmail/")) {
+                    String email = extractPathVarFromRequest(requestURI);
+                    if (!email.equals(userEmail)) {
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        return;
+                    }
+                }
+
+                if ("/removeCollaborator".equals(requestURI)) {
+                    Map<String, String[]> queryParams = request.getParameterMap();
+                    String[] noteIds = queryParams.get("noteId");
+                    String[] userIds = queryParams.get("userId");
+    
+                    if (noteIds == null || userIds == null || noteIds.length == 0 || userIds.length == 0) {
+                        response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters
+                        return;
+                    }
+    
+                    String noteId = noteIds[0]; 
+    
                     if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         return;
@@ -87,7 +133,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         return note;
     }
 
-    private String extractNoteIdFromRequest(String requestURI) {
+    private String extractPathVarFromRequest(String requestURI) {
         String[] parts = requestURI.split("/");
         if (parts.length >= 4) {
             return parts[3];
