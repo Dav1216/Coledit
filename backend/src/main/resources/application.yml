@@ -30,6 +30,9 @@ spring:
       enabled: true
     livereload:
       enabled: true
+  # threads:
+  #   virtual:
+  #     enabled: true
 
 security:
   jwt:

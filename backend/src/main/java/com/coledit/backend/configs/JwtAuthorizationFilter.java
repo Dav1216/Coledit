@@ -16,6 +16,9 @@ import com.coledit.backend.helpers.FilterHelper;
 import com.coledit.backend.services.JwtService;
 import com.coledit.backend.services.NoteService;
 import com.coledit.backend.wrappers.RequestWrapper;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.io.IOException;
@@ -40,6 +43,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException, java.io.IOException {
         request = new RequestWrapper((HttpServletRequest) request);
+        String requestURI = request.getRequestURI();
+        if (requestURI.startsWith("/auth")) {
+            filterChain.doFilter(request, response);
+        }
 
         String jwt = FilterHelper.getJwString(request);
         String userEmail = null;
@@ -47,7 +54,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (jwt != null) {
             userEmail = jwtService.extractUsername(jwt);
         }
-        String requestURI = request.getRequestURI();
+      
 
         // Proceed with authorization checks based on the request method and URI
         switch (request.getMethod()) {
@@ -80,6 +87,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 }
 
                 break;
+
             case "GET", "UPDATE", "DELETE":
                 if (requestURI.startsWith("/note/get/") || requestURI.startsWith("/note/update/")
                         || requestURI.startsWith("/note/delete/")) {
@@ -115,6 +123,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                         return;
                     }
                 }
+
                 break;
         }
 
@@ -124,11 +133,19 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     public Note extractNoteFromBody(HttpServletRequest request) throws IOException, java.io.IOException {
         // Read the request body without modifying the request
-        String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-
+        String body = ((HttpServletRequest) request).getReader().lines()
+        .collect(Collectors.joining(System.lineSeparator()));
+        System.out.println(body);
         // Deserialize the JSON string into a Note object
         ObjectMapper objectMapper = new ObjectMapper();
-        Note note = objectMapper.readValue(body, Note.class);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        Note note = null;
+        try {
+             note = objectMapper.readValue(body, Note.class);
+        } catch (JacksonException e) {
+            System.out.println(e);
+        }
+      
 
         return note;
     }

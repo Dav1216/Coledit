@@ -40,6 +40,7 @@ public class NoteController {
     @PostMapping("/create")
     public ResponseEntity<Note> createNote(@RequestBody Note note) {
         Note createdNote = noteService.createNote(note);
+  
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNote);
     }
 

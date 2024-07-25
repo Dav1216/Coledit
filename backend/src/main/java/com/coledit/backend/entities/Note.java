@@ -1,9 +1,12 @@
 package com.coledit.backend.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +29,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "notes")
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class, 
+  property = "noteId")
 public class Note {
     @Id
     @Column(name = "note_id")
@@ -36,15 +42,11 @@ public class Note {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonManagedReference
+    // @JsonManagedReference(value="ownership")
     private User owner;
 
     @ManyToMany
-    @JoinTable(
-        name = "user_note",
-        joinColumns = @JoinColumn(name = "note_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    @JsonManagedReference
-    private List<User> collaborators;
+    @JoinTable(name = "user_and_note", joinColumns = @JoinColumn(name = "note_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @Builder.Default
+    private List<User> collaborators = new ArrayList<>();;
 }

@@ -36,7 +36,7 @@ public class ApplicationConfiguration {
     UserDetailsService userDetailsService() {
         return username -> {
             User user = userRepository.findByEmail(username)
-                    .orElseThrow(() -> new UserNotFoundException("User not found with email: " + username));
+                    .orElseThrow(() -> new UserNotFoundException("UserDetailsService bean: User not found with email:" + username));
             if (user != null) {
                 return user;
             }

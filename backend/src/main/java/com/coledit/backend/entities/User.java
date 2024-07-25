@@ -1,7 +1,9 @@
 package com.coledit.backend.entities;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -12,8 +14,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +40,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class, 
+  property = "userId")
 public class User implements UserDetails {
     @Id
     @Column(name = "user_id")
@@ -46,12 +55,10 @@ public class User implements UserDetails {
     private String roles;
 
     @OneToMany(mappedBy = "owner")
-    @JsonBackReference
-    private Set<Note> ownedNotes;
+    private List<Note> ownedNotes;
 
     @ManyToMany(mappedBy = "collaborators")
-    @JsonBackReference
-    private Set<Note> collaboratedNotes;
+    private List<Note> collaboratedNotes;
 
     @Override
     @Transient
@@ -105,7 +112,7 @@ public class User implements UserDetails {
 
     @Override
     @Transient
-        @JsonIgnore
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }

@@ -15,6 +15,7 @@ import com.coledit.backend.exceptions.UserNotFoundException;
 import com.coledit.backend.repositories.NoteRepository;
 import com.coledit.backend.repositories.UserRepository;
 
+import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 
 @Service
