@@ -9,13 +9,8 @@ function NoteList(props) {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        console.log("dsfdsfadfsdf");
-        console.log(props.userEmail);
         const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUserEmail/${props.userEmail}`);
         const data = await response.json();
-        
-        // Log the data to inspect its structure
-        console.log('Fetched notes:', data);
 
         // Ensure data is an array before setting it to state
         if (Array.isArray(data)) {

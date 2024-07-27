@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coledit.backend.entities.Note;
+import com.coledit.backend.entities.User;
 import com.coledit.backend.services.NoteService;
 
 @RestController
@@ -104,6 +105,17 @@ public class NoteController {
         }
     }
 
+
+    @GetMapping("/getCollaborators/{noteId}")
+    public ResponseEntity<List<User>> getCollaborators(@PathVariable(value = "noteId") String noteId) {
+        List<User> collaborators = noteService.getNoteCollaborators(noteId);
+        if (collaborators != null) {
+            return ResponseEntity.ok(collaborators);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     /**
      * Handles POST requests to add a collaborator to a note.
      * 
@@ -112,8 +124,8 @@ public class NoteController {
      * @return a ResponseEntity containing the updated note.
      */
     @PostMapping("/addCollaborator")
-    public ResponseEntity<Note> addCollaborator(@RequestParam String noteId, @RequestParam String userId) {
-        Note updatedNote = noteService.addCollaborator(noteId, userId);
+    public ResponseEntity<Note> addCollaborator(@RequestParam String noteId, @RequestParam String userEmail) {
+        Note updatedNote = noteService.addCollaborator(noteId, userEmail);
         if (updatedNote != null) {
             return ResponseEntity.ok(updatedNote);
         } else {
@@ -122,15 +134,15 @@ public class NoteController {
     }
 
     /**
-     * Handles POST requests to remove a collaborator from a note.
+     * Handles Delete requests to remove a collaborator from a note.
      * 
      * @param noteId the ID of the note.
      * @param userId the ID of the user to remove as a collaborator.
      * @return a ResponseEntity containing the updated note.
      */
     @DeleteMapping("/removeCollaborator")
-    public ResponseEntity<Note> removeCollaborator(@RequestParam String noteId, @RequestParam String userId) {
-        Note updatedNote = noteService.removeCollaborator(noteId, userId);
+    public ResponseEntity<Note> removeCollaborator(@RequestParam String noteId, @RequestParam String userEmail) {
+        Note updatedNote = noteService.removeCollaborator(noteId, userEmail);
         if (updatedNote != null) {
             return ResponseEntity.ok(updatedNote);
         } else {

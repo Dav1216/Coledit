@@ -11,10 +11,7 @@ function Home() {
 
   useEffect(() => {
     const userEmailFromCookie = getCookie('email');
-    console.log("jere2");
-    console.log(userEmailFromCookie);
     if (userEmailFromCookie) {
-      console.log("jere");
       setUserEmail(userEmailFromCookie);
     }
   }, []);

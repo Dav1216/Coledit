@@ -71,13 +71,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 if ("/note/addCollaborator".equals(requestURI)) {
                     Map<String, String[]> queryParams = request.getParameterMap();
                     String[] noteIds = queryParams.get("noteId");
-                    String[] userIds = queryParams.get("userId");
+                    String[] userEmails = queryParams.get("userEmail");
 
-                    if (noteIds == null || userIds == null || noteIds.length == 0 || userIds.length == 0) {
+                    if (noteIds == null || userEmails == null || noteIds.length == 0 || userEmails.length == 0) {
                         response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters
                         return;
                     }
-
                     String noteId = noteIds[0];
 
                     if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
@@ -115,7 +114,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                         response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters
                         return;
                     }
-
                     String noteId = noteIds[0];
 
                     if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {

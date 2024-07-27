@@ -66,9 +66,9 @@ public class NoteService {
     }
 
     @Transactional
-    public Note addCollaborator(String noteId, String userId) {
+    public Note addCollaborator(String noteId, String userEmail) {
         Optional<Note> noteOptional = noteRepository.findById(UUID.fromString(noteId));
-        Optional<User> userOptional = userRepository.findById(UUID.fromString(userId));
+        Optional<User> userOptional = userRepository.findByEmail(userEmail);
         if (noteOptional.isPresent() && userOptional.isPresent()) {
             Note note = noteOptional.get();
             User user = userOptional.get();
@@ -79,9 +79,9 @@ public class NoteService {
     }
 
     @Transactional
-    public Note removeCollaborator(String noteId, String userId) {
+    public Note removeCollaborator(String noteId, String userEmail) {
         Optional<Note> noteOptional = noteRepository.findById(UUID.fromString(noteId));
-        Optional<User> userOptional = userRepository.findById(UUID.fromString(userId));
+        Optional<User> userOptional = userRepository.findByEmail(userEmail);
         if (noteOptional.isPresent() && userOptional.isPresent()) {
             Note note = noteOptional.get();
             User user = userOptional.get();
@@ -104,5 +104,10 @@ public class NoteService {
     public boolean isNoteIdAccessiblByUserEmail(String noteId, String userEmail) {
         List<Note> acccessibleNotes = getNotesByUserEmail(userEmail);
         return acccessibleNotes.stream().anyMatch(note -> note.getNoteId().toString().equals(noteId));
+    }
+
+    public List<User> getNoteCollaborators(String noteId) {
+        List<User> noteCollaborators = noteRepository.findCollaboratorsByNoteId(UUID.fromString(noteId));
+        return noteCollaborators;
     }
 }
