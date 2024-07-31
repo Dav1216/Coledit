@@ -1,13 +1,9 @@
 package com.coledit.backend.configs;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,14 +13,12 @@ import com.coledit.backend.services.JwtService;
 import com.coledit.backend.services.NoteService;
 import com.coledit.backend.wrappers.RequestWrapper;
 import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -129,7 +123,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    public Note extractNoteFromBody(HttpServletRequest request) throws IOException, java.io.IOException {
+    public Note extractNoteFromBody(HttpServletRequest request) throws java.io.IOException {
         // Read the request body without modifying the request
         String body = ((HttpServletRequest) request).getReader().lines()
         .collect(Collectors.joining(System.lineSeparator()));

@@ -1,6 +1,8 @@
 package com.coledit.backend.configs;
 
 import com.coledit.backend.handlers.SocketConnectionHandler;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -13,6 +15,9 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class WebSocketConfig
         implements WebSocketConfigurer {
 
+    @Value("${custom.hostname}")
+    private String hostname;
+
     // Overriding a method which register the socket
     // handlers into a Registry
     @Override
@@ -23,7 +28,8 @@ public class WebSocketConfig
         // the CORS policy for the handlers so that other
         // domains can also access the socket
         webSocketHandlerRegistry
-                .addHandler(new SocketConnectionHandler(), "/document")
-                .setAllowedOrigins("*");
+                .addHandler(new SocketConnectionHandler(), "/document/*")
+                .setAllowedOrigins(
+                        "https://" + hostname);
     }
 }
