@@ -7,8 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.coledit.backend.dtos.LoginUserDTO;
-import com.coledit.backend.dtos.RegisterUserDTO;
+import com.coledit.backend.dtos.UserDTO;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.repositories.UserRepository;
 
@@ -59,7 +58,7 @@ public class AuthenticationService {
      * @throws EmailAlreadyInUseException if the email is already in use
      */
     @Transactional
-    public User signup(RegisterUserDTO input) {
+    public User signup(UserDTO input) {
         if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new EmailAlreadyInUseException("The email address is already in use: " + input.getEmail());
         }
@@ -78,7 +77,7 @@ public class AuthenticationService {
      * @param input the data transfer object containing login details
      * @return the authenticated user
      */
-    public User authenticate(LoginUserDTO input) {
+    public User authenticate(UserDTO input) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),

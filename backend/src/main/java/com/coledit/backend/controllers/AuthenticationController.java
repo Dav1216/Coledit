@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coledit.backend.builders.CookieBuilder;
-import com.coledit.backend.dtos.LoginUserDTO;
-import com.coledit.backend.dtos.RegisterUserDTO;
+import com.coledit.backend.dtos.UserDTO;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.exceptions.EmailAlreadyInUseException;
 import com.coledit.backend.repositories.UserRepository;
@@ -59,7 +58,7 @@ public class AuthenticationController {
      * @return the registered user or conflict status if user already exists
      */
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDTO registerUserDto) {
+    public ResponseEntity<User> register(@RequestBody UserDTO registerUserDto) {
         try {
             User registeredUser = authenticationService.signup(registerUserDto);
 
@@ -78,7 +77,7 @@ public class AuthenticationController {
      * @return a success message or error status if authentication fails
      */
     @PostMapping("/login")
-    public ResponseEntity<String> authenticate(@RequestBody LoginUserDTO loginUserDto, HttpServletResponse request,
+    public ResponseEntity<String> authenticate(@RequestBody UserDTO loginUserDto, HttpServletResponse request,
             HttpServletResponse response) {
         try {
             User authenticatedUser = authenticationService.authenticate(loginUserDto);
