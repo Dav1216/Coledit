@@ -1,35 +1,25 @@
 package com.coledit.backend.configs;
 
-import com.coledit.backend.handlers.SocketConnectionHandler;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-// web socket connections is handled  
-// by this class 
 @Configuration
-@EnableWebSocket
-public class WebSocketConfig
-        implements WebSocketConfigurer {
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Value("${custom.hostname}")
-    private String hostname;
-
-    // Overriding a method which register the socket
-    // handlers into a Registry
     @Override
-    public void registerWebSocketHandlers(
-            WebSocketHandlerRegistry webSocketHandlerRegistry) {
-        // For adding a Handler I give the Handler class
-        // created before with End point Also we are managing
-        // the CORS policy for the handlers so that other
-        // domains can also access the socket
-        webSocketHandlerRegistry
-                .addHandler(new SocketConnectionHandler(), "/document/*")
-                .setAllowedOrigins(
-                        "https://" + hostname);
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        // Configures the message broker
+        config.enableSimpleBroker("/topic");
+        config.setApplicationDestinationPrefixes("/app");
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // Registers the STOMP endpoint and enables SockJS fallback options
+        registry.addEndpoint("/document");
     }
 }
