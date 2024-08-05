@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SocketConnectionHandler extends TextWebSocketHandler {
 
     private final Map<String, List<WebSocketSession>> documentSessions = new ConcurrentHashMap<>();
+    private final Map<String, String> latestDocumentContent = new ConcurrentHashMap<>();
     private NoteService noteService;
 
     @Autowired
@@ -53,6 +54,11 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         if (sessions != null) {
             sessions.remove(session);
             if (sessions.isEmpty()) {
+                String latestContent = latestDocumentContent.getOrDefault(documentId, "");
+                if (!latestContent.isEmpty()) {
+                    noteService.updateNoteContent(documentId, latestContent);
+                    latestDocumentContent.remove(documentId); 
+                }
                 documentSessions.remove(documentId);
             }
         }
@@ -66,7 +72,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonMessage = objectMapper.readTree(message.getPayload().toString());
-        Note toUpdateNote = null;
+        String newContent = null;
 
         if (jsonMessage.has("type") && jsonMessage.get("type").asText().equals("heartbeat")) {
             return; // Do nothing for heartbeat type
@@ -77,7 +83,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
 
             try {
                 JsonNode payloadNode = jsonMessage.get("payload");
-                toUpdateNote = objectMapper.convertValue(payloadNode, Note.class);
+                newContent = objectMapper.convertValue(payloadNode, String.class);
             } catch (RuntimeException e) {
                 System.err.println("Error converting payload to Note object: " + e.getMessage());
                 return; // Early return if conversion fails
@@ -88,12 +94,12 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         }
 
         String documentId = getDocumentId(session);
-        // noteService.updateNote(documentId, toUpdateNote);
+        latestDocumentContent.put(documentId, newContent); 
 
         List<WebSocketSession> sessions = documentSessions.get(documentId);
 
         WSUpdateNotification notification = WSUpdateNotification.builder().type("updateNotification")
-                .payload(toUpdateNote).build();
+                .payload(newContent).build();
         String jsonNotification = objectMapper.writeValueAsString(notification);
 
         if (sessions != null) {

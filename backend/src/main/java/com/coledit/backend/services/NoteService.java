@@ -41,6 +41,16 @@ public class NoteService {
     }
 
     @Transactional
+    public void updateNoteContent(String documentId, String newContent) {
+        Note note = noteRepository.findById(UUID.fromString(documentId)).orElse(null);
+
+        if (note != null) {
+            note.setContent(newContent);
+            noteRepository.save(note);
+        }
+    }
+
+    @Transactional
     public Note updateNote(String id, Note newNote) {
         Optional<Note> existingNote = noteRepository.findById(UUID.fromString(id));
         if (existingNote.isPresent()) {

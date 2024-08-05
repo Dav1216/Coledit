@@ -29,8 +29,12 @@ function Note(props) {
           const data = JSON.parse(event.data);
 
           if (data.type === 'updateNotification') {
-            console.log('Received note update:', data.payload);
-            setNote(data.payload);
+            const updatedNote = {
+              ...note,
+              content: data.payload
+            };
+
+            setNote(updatedNote);
           }
         } catch (error) {
           console.error('Error parsing message:', error);
@@ -62,12 +66,12 @@ function Note(props) {
       // Assuming the server expects JSON formatted messages
       const message = JSON.stringify({
         type: 'updateNote',
-        payload: note // Include the entire note object in the payload
+        payload: note.content // Include the entire note object in the payload
       });
       socketRef.current.send(message);
     }
   };
-  
+
 
   useEffect(() => {
     fetchCollaborators();

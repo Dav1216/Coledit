@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WSUpdateNotification {
     private String type;
-    private Object payload;
+    private String payload;
 }
