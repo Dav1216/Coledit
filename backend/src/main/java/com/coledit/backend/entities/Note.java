@@ -28,23 +28,31 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "notes")
-@JsonIdentityInfo(
-  generator = ObjectIdGenerators.PropertyGenerator.class, 
-  property = "noteId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "noteId")
 public class Note {
-    @Id
-    @Column(name = "note_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID noteId;
-    private String title;
-    private String content;
+  @Id
+  @Column(name = "note_id")
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private UUID noteId;
+  private String title;
+  private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User owner;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User owner;
 
-    @ManyToMany
-    @JoinTable(name = "user_and_note", joinColumns = @JoinColumn(name = "note_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    @Builder.Default
-    private List<User> collaborators = new ArrayList<>();;
+  @ManyToMany
+  @JoinTable(name = "user_and_note", joinColumns = @JoinColumn(name = "note_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+  @Builder.Default
+  private List<User> collaborators = new ArrayList<>();
+
+  @Override
+  public String toString() {
+    return "Note{" +
+        "noteId='" + noteId + '\'' +
+        ", title='" + title + '\'' +
+        ", content='" + content + '\'' +
+        ", ownerUserId='" + owner.getUserId() + '\'' + // Print only userId instead of entire User object
+        '}';
+  }
 }

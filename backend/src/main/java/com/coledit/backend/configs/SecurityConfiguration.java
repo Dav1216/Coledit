@@ -59,7 +59,6 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                 // Developer setup
                 .requestMatchers("/**").permitAll() // Allows requests to /auth/** without authentication
-
                 // .requestMatchers("/error").permitAll()
                 // // // Authentication endpoints
                 // .requestMatchers("/auth/**").permitAll()

@@ -4,12 +4,14 @@
 # This file contains configuration settings for the Spring Boot application.
 # It includes database, JPA, and security configurations.
 # =============================================================================
-
 logging:
   level:
     org:
       springframework:
         security: DEBUG # Logging level for debug messages
+        web:
+          socket: DEBUG
+        messaging: DEBUG
 
 spring:
   datasource:

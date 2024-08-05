@@ -6,15 +6,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.TextMessage;
+
+import com.coledit.backend.entities.Note;
+import com.coledit.backend.entities.WSUpdateNotification;
+import com.coledit.backend.services.NoteService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // Socket-Connection Configuration class 
+@Component
 public class SocketConnectionHandler extends TextWebSocketHandler {
 
-     private final Map<String, List<WebSocketSession>> documentSessions = new ConcurrentHashMap<>();
+    private final Map<String, List<WebSocketSession>> documentSessions = new ConcurrentHashMap<>();
+    private NoteService noteService;
+
+    @Autowired
+    public SocketConnectionHandler(NoteService noteService) {
+        this.noteService = noteService;
+    }
 
     // This method is executed when client tries to connect
     @Override
@@ -47,14 +63,43 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         super.handleMessage(session, message);
-        
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonMessage = objectMapper.readTree(message.getPayload().toString());
+        Note toUpdateNote = null;
+
+        if (jsonMessage.has("type") && jsonMessage.get("type").asText().equals("heartbeat")) {
+            return; // Do nothing for heartbeat type
+        }
+        // Check if the message has the expected structure for updating notes
+        if (jsonMessage.has("type") && jsonMessage.has("payload") &&
+                jsonMessage.get("type").asText().equals("updateNote")) {
+
+            try {
+                JsonNode payloadNode = jsonMessage.get("payload");
+                toUpdateNote = objectMapper.convertValue(payloadNode, Note.class);
+            } catch (RuntimeException e) {
+                System.err.println("Error converting payload to Note object: " + e.getMessage());
+                return; // Early return if conversion fails
+            }
+        } else {
+            System.out.println("Received message does not have the expected 'update' type.");
+            return; // Early return for unexpected types
+        }
+
         String documentId = getDocumentId(session);
+        // noteService.updateNote(documentId, toUpdateNote);
+
         List<WebSocketSession> sessions = documentSessions.get(documentId);
+
+        WSUpdateNotification notification = WSUpdateNotification.builder().type("updateNotification")
+                .payload(toUpdateNote).build();
+        String jsonNotification = objectMapper.writeValueAsString(notification);
 
         if (sessions != null) {
             for (WebSocketSession webSocketSession : sessions) {
                 if (session != webSocketSession) {
-                    webSocketSession.sendMessage(message);
+                    webSocketSession.sendMessage(new TextMessage(jsonNotification));
                 }
             }
         }

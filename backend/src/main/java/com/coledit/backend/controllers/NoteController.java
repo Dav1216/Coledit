@@ -4,8 +4,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,14 +68,7 @@ public class NoteController {
         List<Note> notes = noteService.getAllNotes();
         return ResponseEntity.ok(notes);
     }
-
-    @MessageMapping("/updateNote")
-    @SendTo("/topic/noteUpdates")
-    public Note updateNoteContent(Note message) {
-        System.out.println("here");
-        return noteService.updateNote(message.getNoteId().toString(), message);
-    }
-
+    
     /**
      * Handles PUT requests to update an existing note by its ID.
      * 

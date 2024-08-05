@@ -1,25 +1,39 @@
 package com.coledit.backend.configs;
 
+import com.coledit.backend.handlers.SocketConnectionHandler;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+// web socket connections is handled  
+// by this class 
 @Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+@EnableWebSocket
+public class WebSocketConfig
+        implements WebSocketConfigurer {
 
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Configures the message broker
-        config.enableSimpleBroker("/topic");
-        config.setApplicationDestinationPrefixes("/app");
+    @Value("${custom.hostname}")
+    private String hostname;
+
+    private final SocketConnectionHandler socketConnectionHandler;
+
+    @Autowired // Injects the SocketConnectionHandler bean managed by Spring
+    public WebSocketConfig(SocketConnectionHandler socketConnectionHandler) {
+        this.socketConnectionHandler = socketConnectionHandler;
     }
 
+    // Overriding a method which register the socket
+    // handlers into a Registry
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Registers the STOMP endpoint and enables SockJS fallback options
-        registry.addEndpoint("/document");
+    public void registerWebSocketHandlers(
+            WebSocketHandlerRegistry webSocketHandlerRegistry) {
+        webSocketHandlerRegistry
+                .addHandler(socketConnectionHandler, "/document/*")
+                .setAllowedOrigins(
+                        "https://" + hostname);
     }
 }
