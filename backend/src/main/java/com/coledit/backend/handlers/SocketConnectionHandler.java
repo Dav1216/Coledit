@@ -1,5 +1,6 @@
 package com.coledit.backend.handlers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +15,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.TextMessage;
 
-import com.coledit.backend.entities.Note;
 import com.coledit.backend.entities.WSUpdateNotification;
 import com.coledit.backend.services.NoteService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,7 +57,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
                 String latestContent = latestDocumentContent.getOrDefault(documentId, "");
                 if (!latestContent.isEmpty()) {
                     noteService.updateNoteContent(documentId, latestContent);
-                    latestDocumentContent.remove(documentId); 
+                    latestDocumentContent.remove(documentId);
                 }
                 documentSessions.remove(documentId);
             }
@@ -66,40 +66,110 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         System.out.println("Session " + session.getId() + " disconnected from document " + documentId);
     }
 
+    // @Override
+    // public void handleMessage(WebSocketSession session, WebSocketMessage<?>
+    // message) throws Exception {
+    // super.handleMessage(session, message);
+
+    // ObjectMapper objectMapper = new ObjectMapper();
+    // JsonNode jsonMessage =
+    // objectMapper.readTree(message.getPayload().toString());
+    // String newContent = null;
+
+    // if (jsonMessage.has("type") &&
+    // jsonMessage.get("type").asText().equals("heartbeat")) {
+    // return; // Do nothing for heartbeat type
+    // }
+    // // Check if the message has the expected structure for updating notes
+    // if (jsonMessage.has("type") && jsonMessage.has("payload") &&
+    // jsonMessage.get("type").asText().equals("updateNote")) {
+
+    // try {
+    // JsonNode payloadNode = jsonMessage.get("payload");
+    // newContent = objectMapper.convertValue(payloadNode, String.class);
+    // } catch (RuntimeException e) {
+    // System.err.println("Error converting payload to Note object: " +
+    // e.getMessage());
+    // return; // Early return if conversion fails
+    // }
+    // } else {
+    // System.out.println("Received message does not have the expected 'update'
+    // type.");
+    // return; // Early return for unexpected types
+    // }
+
+    // String documentId = getDocumentId(session);
+    // latestDocumentContent.put(documentId, newContent);
+
+    // List<WebSocketSession> sessions = documentSessions.get(documentId);
+
+    // WSUpdateNotification notification =
+    // WSUpdateNotification.builder().type("updateNotification")
+    // .payload(newContent).build();
+    // String jsonNotification = objectMapper.writeValueAsString(notification);
+
+    // if (sessions != null) {
+    // for (WebSocketSession webSocketSession : sessions) {
+    // if (session != webSocketSession) {
+    // webSocketSession.sendMessage(new TextMessage(jsonNotification));
+    // }
+    // }
+    // }
+    // }
+
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         super.handleMessage(session, message);
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonMessage = objectMapper.readTree(message.getPayload().toString());
-        String newContent = null;
 
-        if (jsonMessage.has("type") && jsonMessage.get("type").asText().equals("heartbeat")) {
+        if (isHeartbeatMessage(jsonMessage)) {
             return; // Do nothing for heartbeat type
         }
-        // Check if the message has the expected structure for updating notes
-        if (jsonMessage.has("type") && jsonMessage.has("payload") &&
-                jsonMessage.get("type").asText().equals("updateNote")) {
 
-            try {
-                JsonNode payloadNode = jsonMessage.get("payload");
-                newContent = objectMapper.convertValue(payloadNode, String.class);
-            } catch (RuntimeException e) {
-                System.err.println("Error converting payload to Note object: " + e.getMessage());
-                return; // Early return if conversion fails
-            }
-        } else {
-            System.out.println("Received message does not have the expected 'update' type.");
-            return; // Early return for unexpected types
+        String newContent = extractNoteContent(jsonMessage, objectMapper);
+        if (newContent == null) {
+            return; // Early return if the message doesn't have the expected structure
         }
 
         String documentId = getDocumentId(session);
-        latestDocumentContent.put(documentId, newContent); 
+        updateLatestDocumentContent(documentId, newContent);
 
+        broadcastUpdateNotification(session, documentId, newContent, objectMapper);
+    }
+
+    private boolean isHeartbeatMessage(JsonNode jsonMessage) {
+        return jsonMessage.has("type") && jsonMessage.get("type").asText().equals("heartbeat");
+    }
+
+    private String extractNoteContent(JsonNode jsonMessage, ObjectMapper objectMapper) {
+        if (jsonMessage.has("type") && jsonMessage.has("payload") &&
+                jsonMessage.get("type").asText().equals("updateNote")) {
+            try {
+                JsonNode payloadNode = jsonMessage.get("payload");
+                return objectMapper.convertValue(payloadNode, String.class);
+            } catch (RuntimeException e) {
+                System.err.println("Error converting payload to Note object: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Received message does not have the expected 'update' type.");
+        }
+        return null;
+    }
+
+    private void updateLatestDocumentContent(String documentId, String newContent) {
+        latestDocumentContent.put(documentId, newContent);
+    }
+
+    private void broadcastUpdateNotification(WebSocketSession session, String documentId, String newContent,
+            ObjectMapper objectMapper) throws IOException {
         List<WebSocketSession> sessions = documentSessions.get(documentId);
 
-        WSUpdateNotification notification = WSUpdateNotification.builder().type("updateNotification")
-                .payload(newContent).build();
+        WSUpdateNotification notification = WSUpdateNotification.builder()
+                .type("updateNotification")
+                .payload(newContent)
+                .build();
         String jsonNotification = objectMapper.writeValueAsString(notification);
 
         if (sessions != null) {

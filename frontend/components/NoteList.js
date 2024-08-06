@@ -23,24 +23,41 @@ function NoteList(props) {
       }
     };
     fetchNotes();
+     const intervalId = setInterval(fetchNotes, 3000); // Fetch notes every 30 seconds
+
+     return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, [props.userEmail]);
 
   const selectNote = (note) => {
-    setSelectedNote(note);
+    setSelectedNote(note === selectedNote ? null : note);
   };
+
+  const updateSelectedNote = (updatedNote) => {
+    setSelectedNote(updatedNote);
+    setNotes((prevNotes) =>
+      prevNotes.map((note) => (note.id === updatedNote.id ? updatedNote : note))
+    );
+  };
+
+    // Log the notes state whenever it changes
+    useEffect(() => {
+      console.log("Updated notes:", notes);
+    }, [notes]);
 
   return (
     <div>
       <ul>
         {notes.map(note => (
-           <li key={note.id} onClick={() => selectNote(note)}>{note.title}</li>
+            <li key={note.id} onClick={() => selectNote(note)}>
+              {note.title}
+            </li>
         ))}
       </ul>
       {selectedNote ? (
-          <Note note={selectedNote} />
-        ) : (
-          <p>Select a note to view its content</p>
-        )}
+        <Note note={selectedNote} setNote={updateSelectedNote} />
+      ) : (
+        <p>Select a note to view its content</p>
+      )}
     </div>
   );
 };

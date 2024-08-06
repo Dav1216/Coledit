@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-function Note(props) {
-  const [note, setNote] = useState(props.note);
+function Note({ note, setNote }){
+
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [isUserListVisible, setIsUserListVisible] = useState(false);
@@ -96,7 +96,7 @@ function Note(props) {
   }, [note.content]); // Run the effect whenever the note state changes
 
   const addUserByEmail = async (email) => {
-    const noteId = props.note.noteId; // Assuming the note ID is part of the props
+    const noteId = note.noteId; // Assuming the note ID is part of the props
 
     try {
       const response = await fetch(`https://${process.env.HOSTNAME}/api/note/addCollaborator?noteId=${noteId}&userEmail=${email}`, {
@@ -107,7 +107,6 @@ function Note(props) {
       });
 
       if (response.ok) {
-        const updatedNote = await response.json();
         setIsPopupOpen(false); // Close the popup after adding a user
       } else {
         console.error('Failed to add collaborator');
@@ -117,17 +116,29 @@ function Note(props) {
     }
   };
 
+  const textAreaOnChange = (e) => {
+    const newContent = e.target.value;
+    if (newContent.length <= 1000) {
+      let updateNote = {...note, content: newContent}
+      setNote(updateNote);
+    } else {
+      alert("Sorry, but the note cannot exceed 1000 characters.");
+      // Optionally, truncate the content to the last valid character
+      setNote((prevNote) => ({
+        ...prevNote,
+        content: prevNote.content.slice(0, 999),
+      }));
+    }
+  }
+
   return (
     <div className='note'>
-      <h2>{props.note.title}</h2>
+      <h2>{note.title}</h2>
       <textarea
         value={note.content}
-        onChange={(e) => setNote((prevNote) => ({
-          ...prevNote,
-          content: e.target.value,
-        }))}
+        onChange={textAreaOnChange}
       />
-      <button onClick={() => setIsPopupOpen(true)}>Add User</button>
+      <button onClick={() => setIsPopupOpen((prev) => !prev)}>Add User</button>
       <button onClick={() => setIsUserListVisible(!isUserListVisible)}>
         Toggle User List
       </button>
