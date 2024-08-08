@@ -1,47 +1,18 @@
-package com.coledit.backend.handlers;
+package com.coledit.backend.helpers;
 
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.AbstractDelta;
-import com.github.difflib.patch.ChangeDelta;
-import com.github.difflib.patch.Chunk;
-import com.github.difflib.patch.DeleteDelta;
-import com.github.difflib.patch.InsertDelta;
 import com.github.difflib.patch.Patch;
 import com.github.difflib.patch.PatchFailedException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class StringMerger {
-    // public static void main(String[] args) throws PatchFailedException {
-    // System.out.println("Beginning time");
-
-    // long startTime = System.nanoTime(); // Start timing
-
-    // System.out.println(ContentMerger.mergeVariants("abcd", List.of("cde",
-    // "acd")));
-
-    // long endTime = System.nanoTime(); // End timing
-
-    // System.out.println("End time");
-
-    // // Calculate duration
-    // long duration = endTime - startTime;
-    // System.out.println("Duration in nanoseconds: " + duration);
-    // System.out.println("Duration in milliseconds: " + duration / 1000000.0); //
-    // Convert nanoseconds to milliseconds
-
-    // // Optionally, print duration in seconds
-    // System.out.println("Duration in seconds: " + duration / 1000000000.0); //
-    // Convert nanoseconds to seconds
-    // }
 
     public static String mergeVariants(String original, List<String> variants) throws PatchFailedException {
-        List<List<Character>> decomposedVariants = variants.stream().map(ContentMerger::stringToList)
+        List<List<Character>> decomposedVariants = variants.stream().map(StringMerger::stringToList)
                 .collect(Collectors.toList());
         return listToString(mergeListVariants(stringToList(original), decomposedVariants));
     }
@@ -66,8 +37,6 @@ public class StringMerger {
 
         List<AbstractDelta<Character>> mergedDeltas = patches.stream().flatMap(patch -> patch.getDeltas().stream())
                 .collect(Collectors.toList());
-        System.out.println("merged");
-        mergedDeltas.forEach(System.out::println);
 
         // Resolve conflicts
         List<AbstractDelta<Character>> resolvedDeltas = resolveConflicts(mergedDeltas);
@@ -88,16 +57,43 @@ public class StringMerger {
     }
 
     private static List<AbstractDelta<Character>> resolveConflicts(List<AbstractDelta<Character>> deltas) {
-        Map<String, AbstractDelta<Character>> deltaMap = new HashMap<>();
+        List<AbstractDelta<Character>> resolvedDeltas = new ArrayList<>();
 
         for (AbstractDelta<Character> delta : deltas) {
-            String key = delta.getSource().getPosition() + "-" + delta.getTarget().getPosition();
-            if (!deltaMap.containsKey(key)) {
-                deltaMap.put(key, delta);
+            boolean conflictResolved = false;
+
+            for (AbstractDelta<Character> resolvedDelta : resolvedDeltas) {
+                if (hasIntersection(delta, resolvedDelta)) {
+                    // Resolve the conflict by taking either delta or resolvedDelta
+                    AbstractDelta<Character> selectedDelta = selectDelta(delta, resolvedDelta);
+                    resolvedDeltas.remove(resolvedDelta);
+                    resolvedDeltas.add(selectedDelta);
+                    conflictResolved = true;
+                    break;
+                }
+            }
+
+            if (!conflictResolved) {
+                resolvedDeltas.add(delta);
             }
         }
 
-        return new ArrayList<>(deltaMap.values());
+        return resolvedDeltas;
     }
 
+    private static boolean hasIntersection(AbstractDelta<Character> delta1, AbstractDelta<Character> delta2) {
+        // checking if there is an intersection between the deltas
+        int start1 = delta1.getSource().getPosition();
+        int end1 = start1 + delta1.getSource().size();
+        int start2 = delta2.getSource().getPosition();
+        int end2 = start2 + delta2.getSource().size();
+
+        return (start1 < end2 && end1 > start2) || (start2 < end1 && end2 > start1);
+    }
+
+    private static AbstractDelta<Character> selectDelta(AbstractDelta<Character> delta1,
+            AbstractDelta<Character> delta2) {
+        // selecting the delta with the bigger size
+        return delta1.getSource().size() >= delta2.getSource().size() ? delta1 : delta2;
+    }
 }

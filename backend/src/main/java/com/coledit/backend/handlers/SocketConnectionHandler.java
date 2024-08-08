@@ -16,6 +16,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.TextMessage;
 
 import com.coledit.backend.entities.WSUpdateNotification;
+import com.coledit.backend.helpers.StringMerger;
 import com.coledit.backend.services.NoteService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
 
     private final Map<String, List<WebSocketSession>> documentSessions = new ConcurrentHashMap<>();
     private final Map<String, String> latestDocumentContent = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> latestDocumentVariants = new ConcurrentHashMap<>();
     private NoteService noteService;
 
     @Autowired
@@ -81,11 +83,22 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         if (newContent == null) {
             return; // Early return if the message doesn't have the expected structure
         }
-
         String documentId = getDocumentId(session);
-        updateLatestDocumentContent(documentId, newContent);
+        List<String> latestVariants = latestDocumentVariants.computeIfAbsent(documentId,
+                k -> Collections.synchronizedList(new ArrayList<>()));
+        latestVariants.add(newContent);
 
-        broadcastUpdateNotification(session, documentId, newContent, objectMapper);
+        synchronized (latestVariants) {
+            String latestMergedVersion = StringMerger.mergeVariants(latestDocumentContent.get(documentId),
+                    latestVariants);
+
+            // update last known version of the document
+            updateLatestDocumentContent(documentId, latestMergedVersion);
+            // clear the versions that have been used to calculate the last merged version
+            latestVariants.clear();
+
+            broadcastUpdateNotification(session, documentId, latestMergedVersion, objectMapper);
+        }
     }
 
     private boolean isHeartbeatMessage(JsonNode jsonMessage) {
