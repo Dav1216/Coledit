@@ -1,10 +1,16 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Note from './Note';
 
 function NoteList(props) {
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
+  const selectedNoteRef = useRef(selectedNote);
+  const firstOpenedNote = useRef(null);
+
+  useEffect(() => {
+    selectedNoteRef.current = selectedNote;
+  }, [selectedNote]);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -12,9 +18,20 @@ function NoteList(props) {
         const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUserEmail/${props.userEmail}`);
         const data = await response.json();
 
-        // Ensure data is an array before setting it to state
         if (Array.isArray(data)) {
           setNotes(data);
+
+          const fetchedSelectedNote = data.find((note) => note.id === selectedNoteRef.current?.id);
+          if (firstOpenedNote.current === null) {
+            firstOpenedNote.current = fetchedSelectedNote;
+            console.log("here")
+            console.log(fetchedSelectedNote);
+          } else if (fetchedSelectedNote.content !== firstOpenedNote.current.content) {
+            alert("Newer version detected, updated your document");
+            firstOpenedNote.current = fetchedSelectedNote;
+
+            setSelectedNote((previousNote) => ({ ...previousNote, content: fetchedSelectedNote.content }));
+          }
         } else {
           console.error('Fetched data is not an array:', data);
         }
@@ -22,10 +39,11 @@ function NoteList(props) {
         console.error('Error fetching notes:', error);
       }
     };
-    fetchNotes();
-     const intervalId = setInterval(fetchNotes, 3000); // Fetch notes every 30 seconds
 
-     return () => clearInterval(intervalId); // Cleanup interval on component unmount
+    fetchNotes();
+    const intervalId = setInterval(fetchNotes, 10000); // Fetch notes every 10 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, [props.userEmail]);
 
   const selectNote = (note) => {
@@ -39,18 +57,13 @@ function NoteList(props) {
     );
   };
 
-    // Log the notes state whenever it changes
-    useEffect(() => {
-      console.log("Updated notes:", notes);
-    }, [notes]);
-
   return (
     <div>
       <ul>
         {notes.map(note => (
-            <li key={note.id} onClick={() => selectNote(note)}>
-              {note.title}
-            </li>
+          <li key={note.id} onClick={() => selectNote(note)}>
+            {note.title}
+          </li>
         ))}
       </ul>
       {selectedNote ? (

@@ -2,6 +2,7 @@ package com.coledit.backend.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -12,12 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.exceptions.UserNotFoundException;
 import com.coledit.backend.repositories.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * Configuration class for setting up security-related beans such as
- * UserDetailsService, PasswordEncoder, AuthenticationManager, and
- * AuthenticationProvider.
- */
+// The configuration of the application
 @Configuration
 public class ApplicationConfiguration {
 
@@ -73,5 +71,14 @@ public class ApplicationConfiguration {
         authProvider.setPasswordEncoder(passwordEncoder());
 
         return authProvider;
+    }
+
+
+    @Bean
+    @Scope("singleton")
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        
+        return mapper;
     }
 }

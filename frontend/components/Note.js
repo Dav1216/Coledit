@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getCookie } from 'cookies-next';
 
-function Note({ note, setNote }){
+function Note({ note, setNote }) {
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [isUserListVisible, setIsUserListVisible] = useState(false);
+
   const socketRef = useRef();
   const heartbeatIntervalRef = useRef();
+  const versionNumberRef = useRef(0);
 
   useEffect(() => {
     // Initialize WebSocket connection
@@ -35,6 +38,7 @@ function Note({ note, setNote }){
             };
 
             setNote(updatedNote);
+            versionNumberRef.current = data.version;
           }
         } catch (error) {
           console.error('Error parsing message:', error);
@@ -61,12 +65,15 @@ function Note({ note, setNote }){
   }, []);
 
   const sendMessage = () => {
+    console.log(getCookie('email'))
     console.log("Sending message");
+    console.log(note.content);
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && note) { // Check if both socket connection exists and is open
       // Assuming the server expects JSON formatted messages
       const message = JSON.stringify({
         type: 'updateNote',
-        payload: note.content // Include the entire note object in the payload
+        payload: note.content,
+        version: versionNumberRef.current
       });
       socketRef.current.send(message);
     }
@@ -92,8 +99,9 @@ function Note({ note, setNote }){
   };
 
   useEffect(() => {
-    sendMessage(); // Broadcast the changes
-  }, [note.content]); // Run the effect whenever the note state changes
+      console.log("Sent")
+      sendMessage(); // Broadcast the changes
+  }, [note.content]); 
 
   const addUserByEmail = async (email) => {
     const noteId = note.noteId; // Assuming the note ID is part of the props
@@ -119,7 +127,7 @@ function Note({ note, setNote }){
   const textAreaOnChange = (e) => {
     const newContent = e.target.value;
     if (newContent.length <= 1000) {
-      let updateNote = {...note, content: newContent}
+      let updateNote = { ...note, content: newContent }
       setNote(updateNote);
     } else {
       alert("Sorry, but the note cannot exceed 1000 characters.");

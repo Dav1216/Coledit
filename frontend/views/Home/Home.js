@@ -3,9 +3,6 @@
 import NoteList from '../../components/NoteList';
 import { getCookie } from 'cookies-next';
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-
 function Home() {
   const [userEmail, setUserEmail] = useState(null);
 

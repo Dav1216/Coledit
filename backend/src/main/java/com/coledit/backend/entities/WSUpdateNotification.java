@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class WSUpdateNotification {
     private String type;
     private String payload;
+    private Integer version;
 }
