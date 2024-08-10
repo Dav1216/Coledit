@@ -13,6 +13,10 @@ function NoteList(props) {
   }, [selectedNote]);
 
   useEffect(() => {
+  }, [notes]);
+
+
+  useEffect(() => {
     const fetchNotes = async () => {
       try {
         const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUserEmail/${props.userEmail}`);
@@ -22,10 +26,9 @@ function NoteList(props) {
           setNotes(data);
 
           const fetchedSelectedNote = data.find((note) => note.id === selectedNoteRef.current?.id);
+
           if (firstOpenedNote.current === null) {
             firstOpenedNote.current = fetchedSelectedNote;
-            console.log("here")
-            console.log(fetchedSelectedNote);
           } else if (fetchedSelectedNote.content !== firstOpenedNote.current.content) {
             alert("Newer version detected, updated your document");
             firstOpenedNote.current = fetchedSelectedNote;
@@ -41,12 +44,15 @@ function NoteList(props) {
     };
 
     fetchNotes();
-    const intervalId = setInterval(fetchNotes, 10000); // Fetch notes every 10 seconds
+    const intervalId = setInterval(fetchNotes, 2000); // Fetch notes every 10 seconds
 
     return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, [props.userEmail]);
 
   const selectNote = (note) => {
+    if (selectedNote !== null) {
+      firstOpenedNote.current = null;
+    }
     setSelectedNote(note === selectedNote ? null : note);
   };
 

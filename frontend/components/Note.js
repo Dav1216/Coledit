@@ -10,6 +10,7 @@ function Note({ note, setNote }) {
   const socketRef = useRef();
   const heartbeatIntervalRef = useRef();
   const versionNumberRef = useRef(0);
+  const lastContentFromServerRef = useRef(null); // Track the last sent content
 
   useEffect(() => {
     // Initialize WebSocket connection
@@ -26,7 +27,6 @@ function Note({ note, setNote }) {
       }, 30000);
 
       socketRef.current.onmessage = (event) => {
-        console.log('Received message:', event.data);
         try {
           // Assuming the server sends JSON formatted messages
           const data = JSON.parse(event.data);
@@ -36,6 +36,8 @@ function Note({ note, setNote }) {
               ...note,
               content: data.payload
             };
+            lastContentFromServerRef.current = updatedNote;
+            console.log(data.version)
 
             setNote(updatedNote);
             versionNumberRef.current = data.version;
@@ -65,11 +67,10 @@ function Note({ note, setNote }) {
   }, []);
 
   const sendMessage = () => {
-    console.log(getCookie('email'))
-    console.log("Sending message");
-    console.log(note.content);
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && note) { // Check if both socket connection exists and is open
-      // Assuming the server expects JSON formatted messages
+    // console.log(getCookie('email'));
+    // console.log("Sending message");
+    // console.log(note.content);
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && note) {
       const message = JSON.stringify({
         type: 'updateNote',
         payload: note.content,
@@ -78,7 +79,6 @@ function Note({ note, setNote }) {
       socketRef.current.send(message);
     }
   };
-
 
   useEffect(() => {
     fetchCollaborators();
@@ -99,13 +99,14 @@ function Note({ note, setNote }) {
   };
 
   useEffect(() => {
-      console.log("Sent")
-      sendMessage(); // Broadcast the changes
-  }, [note.content]); 
+    if (note.content !== lastContentFromServerRef.current?.content) {
+      versionNumberRef.current++;
+      sendMessage();
+    }
+  }, [note.content]);
 
   const addUserByEmail = async (email) => {
-    const noteId = note.noteId; // Assuming the note ID is part of the props
-
+    const noteId = note.noteId;
     try {
       const response = await fetch(`https://${process.env.HOSTNAME}/api/note/addCollaborator?noteId=${noteId}&userEmail=${email}`, {
         method: 'POST',
@@ -115,7 +116,7 @@ function Note({ note, setNote }) {
       });
 
       if (response.ok) {
-        setIsPopupOpen(false); // Close the popup after adding a user
+        setIsPopupOpen(false);
       } else {
         console.error('Failed to add collaborator');
       }
@@ -131,7 +132,6 @@ function Note({ note, setNote }) {
       setNote(updateNote);
     } else {
       alert("Sorry, but the note cannot exceed 1000 characters.");
-      // Optionally, truncate the content to the last valid character
       setNote((prevNote) => ({
         ...prevNote,
         content: prevNote.content.slice(0, 999),

@@ -67,7 +67,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        
+
         String documentId = getDocumentId(session);
         List<WebSocketSession> sessions = documentSessions.get(documentId);
 
@@ -116,11 +116,14 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         latestVariants.add(newContent);
 
         synchronized (latestVariants) {
-            String latestMergedVersion = StringMerger.mergeVariants(latestDocumentContent.getOrDefault(documentId, ""),
-                    latestVariants);
-            updateLatestDocumentContent(documentId, latestMergedVersion);
-            latestVariants.clear();
-            broadcastUpdateNotification(session, documentId, latestMergedVersion);
+            if (version >= documentVersionCounter.getOrDefault(documentId, 0)) {
+                String latestMergedVersion = StringMerger.mergeVariants(
+                        latestDocumentContent.getOrDefault(documentId, ""),
+                        latestVariants);
+                updateLatestDocumentContent(documentId, latestMergedVersion);
+                latestVariants.clear();
+                broadcastUpdateNotification(session, documentId, latestMergedVersion);
+            }
         }
     }
 
@@ -164,10 +167,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         latestDocumentContent.put(documentId, newContent);
 
         Integer currentValue = documentVersionCounter.getOrDefault(documentId, 0);
-
-        if (currentValue != null) {
-            documentVersionCounter.put(documentId, currentValue + 1);
-        }
+        documentVersionCounter.put(documentId, currentValue + 1);
     }
 
     private void broadcastUpdateNotification(WebSocketSession session, String documentId, String newContent)
