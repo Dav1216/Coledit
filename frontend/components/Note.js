@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getCookie } from 'cookies-next';
 
 function Note({ note, setNote }) {
-
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [isUserListVisible, setIsUserListVisible] = useState(false);

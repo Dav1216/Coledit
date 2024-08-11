@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
@@ -30,20 +31,26 @@ import lombok.NoArgsConstructor;
 @Table(name = "notes")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "noteId")
 public class Note {
+
   @Id
   @Column(name = "note_id")
+  @JsonView(View.Summary.class)
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID noteId;
+  @JsonView(View.Summary.class)
   private String title;
+  @JsonView(View.Summary.class)
   private String content;
 
   @ManyToOne
   @JoinColumn(name = "user_id")
+  @JsonView(View.Summary.class)
   private User owner;
 
   @ManyToMany
   @JoinTable(name = "user_and_note", joinColumns = @JoinColumn(name = "note_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
   @Builder.Default
+  @JsonView(View.Summary.class)
   private List<User> collaborators = new ArrayList<>();
 
   @Override

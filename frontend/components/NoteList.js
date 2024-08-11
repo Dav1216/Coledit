@@ -5,56 +5,29 @@ import Note from './Note';
 function NoteList(props) {
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
-  const selectedNoteRef = useRef(selectedNote);
-  const firstOpenedNote = useRef(null);
+  const [isOpen, setIsOpen] = useState(false)
 
-  useEffect(() => {
-    selectedNoteRef.current = selectedNote;
-  }, [selectedNote]);
+  const fetchNotes = async () => {
+    try {
+      const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUserEmail/${props.userEmail}`);
+      const data = await response.json();
+      console.log(data);
 
-  useEffect(() => {
-  }, [notes]);
-
-
-  useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUserEmail/${props.userEmail}`);
-        const data = await response.json();
-
-        if (Array.isArray(data)) {
-          setNotes(data);
-
-          const fetchedSelectedNote = data.find((note) => note.id === selectedNoteRef.current?.id);
-
-          if (firstOpenedNote.current === null) {
-            firstOpenedNote.current = fetchedSelectedNote;
-          } else if (fetchedSelectedNote.content !== firstOpenedNote.current.content) {
-            alert("Newer version detected, updated your document");
-            firstOpenedNote.current = fetchedSelectedNote;
-
-            setSelectedNote((previousNote) => ({ ...previousNote, content: fetchedSelectedNote.content }));
-          }
-        } else {
-          console.error('Fetched data is not an array:', data);
-        }
-      } catch (error) {
-        console.error('Error fetching notes:', error);
+      if (Array.isArray(data)) {
+        setNotes(data);
+      } else {
+        console.error('Fetched data is not an array:', data);
       }
-    };
-
-    fetchNotes();
-    const intervalId = setInterval(fetchNotes, 2000); // Fetch notes every 10 seconds
-
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
-  }, [props.userEmail]);
-
-  const selectNote = (note) => {
-    if (selectedNote !== null) {
-      firstOpenedNote.current = null;
+    } catch (error) {
+      console.error('Error fetching notes:', error);
     }
-    setSelectedNote(note === selectedNote ? null : note);
   };
+
+  useEffect(() => {
+    fetchNotes();
+    console.log("notes")
+    notes.forEach(note => console.log(note))
+  }, [isOpen, props.userEmail]);
 
   const updateSelectedNote = (updatedNote) => {
     setSelectedNote(updatedNote);
@@ -67,12 +40,12 @@ function NoteList(props) {
     <div>
       <ul>
         {notes.map(note => (
-          <li key={note.id} onClick={() => selectNote(note)}>
+          <li key={note.id} onClick={() => {setIsOpen(!isOpen); setSelectedNote(note)}}>
             {note.title}
           </li>
         ))}
       </ul>
-      {selectedNote ? (
+      {isOpen && selectedNote ? (
         <Note note={selectedNote} setNote={updateSelectedNote} />
       ) : (
         <p>Select a note to view its content</p>

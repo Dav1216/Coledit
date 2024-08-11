@@ -14,14 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.coledit.backend.dtos.NoteDTO;
 import com.coledit.backend.entities.Note;
 import com.coledit.backend.entities.User;
+import com.coledit.backend.entities.View;
 import com.coledit.backend.services.NoteService;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 @RequestMapping("/note")
 public class NoteController {
-    
+
     private final NoteService noteService;
 
     @Autowired
@@ -38,7 +41,7 @@ public class NoteController {
     @PostMapping("/create")
     public ResponseEntity<Note> createNote(@RequestBody Note note) {
         Note createdNote = noteService.createNote(note);
-  
+
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNote);
     }
 
@@ -68,7 +71,7 @@ public class NoteController {
         List<Note> notes = noteService.getAllNotes();
         return ResponseEntity.ok(notes);
     }
-    
+
     /**
      * Handles PUT requests to update an existing note by its ID.
      * 
@@ -101,7 +104,6 @@ public class NoteController {
             return ResponseEntity.notFound().build();
         }
     }
-
 
     @GetMapping("/getCollaborators/{noteId}")
     public ResponseEntity<List<User>> getCollaborators(@PathVariable(value = "noteId") String noteId) {
@@ -148,14 +150,24 @@ public class NoteController {
     }
 
     /**
-     * Handles GET requests to retrieve all notes owned or collaborated on by a specific user.
+     * Handles GET requests to retrieve all notes owned or collaborated on by a
+     * specific user.
      * 
      * @param userId the ID of the user.
      * @return a ResponseEntity containing a list of notes.
      */
     @GetMapping("/getByUserEmail/{userEmail}")
+    @JsonView(View.Summary.class)
     public ResponseEntity<List<Note>> getNotesByUser(@PathVariable String userEmail) {
+        // List<NoteDTO> notesDTO = noteService.getNotesByUserEmail(userEmail).stream()
+        //         .map(note -> NoteDTO.builder().noteId(note.getNoteId())
+        //                 .content(note.getContent())
+        //                 .title(note.getTitle())
+        //                 .build())
+        //         .toList();
+
         List<Note> notes = noteService.getNotesByUserEmail(userEmail);
+
         if (notes != null && !notes.isEmpty()) {
             return ResponseEntity.ok(notes);
         } else {

@@ -39,6 +39,7 @@ import lombok.NoArgsConstructor;
   generator = ObjectIdGenerators.PropertyGenerator.class, 
   property = "userId")
 public class User implements UserDetails {
+    
     @Id
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
