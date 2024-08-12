@@ -43,3 +43,13 @@ To execute backend tests, use:
 docker exec -it backend mvn test
 ```
 
+### Running Tests
+To execute backend tests, use:
+```zsh
+docker exec -it backend mvn test
+```
+
+To access the frontend of the application enter the following URL in your preferred browser: 
+https://localhost/
+
+

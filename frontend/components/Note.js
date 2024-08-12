@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getCookie } from 'cookies-next';
+import noteService from './../services/noteService';
 
 function Note({ note, setNote }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [users, setUsers] = useState([]);
-  const [isUserListVisible, setIsUserListVisible] = useState(false);
+  const [isCollaboratorListVisible, setIsCollaboratorListVisible] = useState(false);
 
   const socketRef = useRef();
   const heartbeatIntervalRef = useRef();
@@ -12,86 +12,17 @@ function Note({ note, setNote }) {
   const lastContentFromServerRef = useRef(null); // Track the last sent content
 
   useEffect(() => {
-    // Initialize WebSocket connection
-    socketRef.current = new WebSocket(`wss://localhost/wsapp/document/${note.noteId}`);
-
-    socketRef.current.onopen = () => {
-      console.log('Connected to WebSocket');
-
-      // Start sending heartbeat messages every 30 seconds
-      heartbeatIntervalRef.current = setInterval(() => {
-        if (socketRef.current.readyState === WebSocket.OPEN) {
-          socketRef.current.send(JSON.stringify({ type: 'heartbeat' }));
-        }
-      }, 30000);
-
-      socketRef.current.onmessage = (event) => {
-        try {
-          // Assuming the server sends JSON formatted messages
-          const data = JSON.parse(event.data);
-
-          if (data.type === 'updateNotification') {
-            const updatedNote = {
-              ...note,
-              content: data.payload
-            };
-            lastContentFromServerRef.current = updatedNote;
-            console.log(data.version)
-
-            setNote(updatedNote);
-            versionNumberRef.current = data.version;
-          }
-        } catch (error) {
-          console.error('Error parsing message:', error);
-        }
-      };
-
-      socketRef.current.onerror = (error) => {
-        console.error('WebSocket Error:', error);
-      };
-
-      socketRef.current.onclose = () => {
-        console.log('Disconnected from WebSocket');
-      };
-    };
-
-
-    return () => {
-      // Clean up on component unmount
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-      clearInterval(heartbeatIntervalRef.current);
-    };
+    noteService.initializeWebSocket(note.noteId, note, setNote, socketRef, heartbeatIntervalRef, versionNumberRef, lastContentFromServerRef);
   }, []);
-
-  const sendMessage = () => {
-    // console.log(getCookie('email'));
-    // console.log("Sending message");
-    // console.log(note.content);
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && note) {
-      const message = JSON.stringify({
-        type: 'updateNote',
-        payload: note.content,
-        version: versionNumberRef.current
-      });
-      socketRef.current.send(message);
-    }
-  };
 
   useEffect(() => {
     fetchCollaborators();
-  }, [isUserListVisible]);
+  }, [isCollaboratorListVisible]);
 
   const fetchCollaborators = async () => {
     try {
-      const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getCollaborators/${note.noteId}`);
-      if (response.ok) {
-        const collaborators = await response.json();
-        setUsers(collaborators);
-      } else {
-        console.error('Failed to fetch collaborators');
-      }
+      const collaborators = await noteService.fetchCollaborators(note.noteId)
+      setUsers(collaborators);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -100,25 +31,17 @@ function Note({ note, setNote }) {
   useEffect(() => {
     if (note.content !== lastContentFromServerRef.current?.content) {
       versionNumberRef.current++;
-      sendMessage();
+      noteService.sendWebSocketMessage(note, socketRef, versionNumberRef);
     }
   }, [note.content]);
 
-  const addUserByEmail = async (email) => {
+  const addUserByEmail = async (e) => {
+    e.preventDefault();
+    const email = e.target.elements.email.value;
     const noteId = note.noteId;
-    try {
-      const response = await fetch(`https://${process.env.HOSTNAME}/api/note/addCollaborator?noteId=${noteId}&userEmail=${email}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
 
-      if (response.ok) {
-        setIsPopupOpen(false);
-      } else {
-        console.error('Failed to add collaborator');
-      }
+    try {
+      noteService.addUserByEmail(noteId, email);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -146,24 +69,19 @@ function Note({ note, setNote }) {
         onChange={textAreaOnChange}
       />
       <button onClick={() => setIsPopupOpen((prev) => !prev)}>Add User</button>
-      <button onClick={() => setIsUserListVisible(!isUserListVisible)}>
+      <button onClick={() => setIsCollaboratorListVisible(!isCollaboratorListVisible)}>
         Toggle User List
       </button>
-      {isUserListVisible && (
+      {isCollaboratorListVisible && (
         <ul>
           {users.map((user, index) => (
             <li key={index}>{user.email}</li>
           ))}
         </ul>
       )}
-      {/* Placeholder for the popup */}
       {isPopupOpen && (
         <div className="popup">
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            const email = e.target.elements.email.value;
-            addUserByEmail(email);
-          }}>
+          <form onSubmit={(e) => addUserByEmail(e)}>
             <input name="email" type="email" placeholder="Enter email" />
             <button type="submit">Add</button>
           </form>

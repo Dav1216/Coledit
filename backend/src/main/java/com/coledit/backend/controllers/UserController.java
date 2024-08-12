@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.coledit.backend.dtos.UserDTO;
+import com.coledit.backend.entities.Note;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.services.UserService;
 
@@ -40,8 +42,8 @@ public class UserController {
      * @return a ResponseEntity containing the user with the specified ID.
      */
     @GetMapping("/get/{id}")
-    public ResponseEntity<User> getUser(@PathVariable(value = "id") String id) {
-        return ResponseEntity.ok(userService.getUser(id));
+    public ResponseEntity<UserDTO> getUser(@PathVariable(value = "id") String id) {
+        return ResponseEntity.ok(convertToUserDTO(userService.getUser(id)));
     }
 
     /**
@@ -52,10 +54,10 @@ public class UserController {
      *         not found response if the user does not exist.
      */
     @GetMapping("/getByEmail/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
         User user = userService.getUserByEmail(email);
         if (user != null) {
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(convertToUserDTO(user));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -67,9 +69,9 @@ public class UserController {
      * @return a ResponseEntity containing a list of all users.
      */
     @GetMapping("/getAll")
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(users.stream().map(UserController::convertToUserDTO).toList());
     }
 
     /**
@@ -80,8 +82,8 @@ public class UserController {
      * @return a ResponseEntity containing the updated user.
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable(value = "id") String id, @RequestBody User newUser) {
-        return ResponseEntity.ok(userService.updateUser(id, newUser));
+    public ResponseEntity<UserDTO> updateUser(@PathVariable(value = "id") String id, @RequestBody User newUser) {
+        return ResponseEntity.ok(convertToUserDTO(userService.updateUser(id, newUser)));
     }
 
     /**
@@ -92,8 +94,8 @@ public class UserController {
      * @return a ResponseEntity containing the updated user.
      */
     @PutMapping("/updateByEmail/{email}")
-    public ResponseEntity<?> updateUserByEmail(@PathVariable String email, @RequestBody User newUser) {
-        return ResponseEntity.ok(userService.updateUserByEmail(email, newUser));
+    public ResponseEntity<UserDTO> updateUserByEmail(@PathVariable String email, @RequestBody User newUser) {
+        return ResponseEntity.ok(convertToUserDTO(userService.updateUserByEmail(email, newUser)));
     }
 
     /**
@@ -103,8 +105,8 @@ public class UserController {
      * @return a ResponseEntity containing the added user.
      */
     @PostMapping(path = "/add")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.addUser(user));
+    public ResponseEntity<UserDTO> addUser(@RequestBody User user) {
+        return ResponseEntity.ok(convertToUserDTO(userService.addUser(user)));
     }
 
     /**
@@ -116,5 +118,14 @@ public class UserController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable(value = "id") String id) {
         return ResponseEntity.ok(userService.deleteUserById(id));
+    }
+
+    public static UserDTO convertToUserDTO(User user) {
+        return UserDTO.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .ownedNotes(user.getOwnedNotes().stream().map(Note::getNoteId).toList())
+                .collaboratedNotes(user.getCollaboratedNotes().stream().map(Note::getNoteId).toList())
+                .build();
     }
 }

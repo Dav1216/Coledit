@@ -1,6 +1,7 @@
 import React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Note from './Note';
+import noteService from './../services/noteService';
 
 function NoteList(props) {
   const [notes, setNotes] = useState([]);
@@ -9,30 +10,30 @@ function NoteList(props) {
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch(`https://${process.env.HOSTNAME}/api/note/getByUserEmail/${props.userEmail}`);
-      const data = await response.json();
-      console.log(data);
-
-      if (Array.isArray(data)) {
-        setNotes(data);
-      } else {
-        console.error('Fetched data is not an array:', data);
-      }
+      let fetchedNotes = await noteService.fetchNotesByUserEmail(props.userEmail);
+      fetchedNotes.sort((a, b) => a.noteId - b.noteId);
+      setNotes(fetchedNotes);
     } catch (error) {
       console.error('Error fetching notes:', error);
     }
   };
 
   useEffect(() => {
+    console.log("notes have been updated")
+    console.log(notes);
+  }, [notes]);
+
+  
+
+  useEffect(() => {
     fetchNotes();
-    console.log("notes")
-    notes.forEach(note => console.log(note))
   }, [isOpen, props.userEmail]);
 
   const updateSelectedNote = (updatedNote) => {
     setSelectedNote(updatedNote);
     setNotes((prevNotes) =>
-      prevNotes.map((note) => (note.id === updatedNote.id ? updatedNote : note))
+      prevNotes.map((note) => (note.noteId === updatedNote.noteId ? updatedNote : note))
+        .sort((a, b) => a.noteId - b.noteId) 
     );
   };
 

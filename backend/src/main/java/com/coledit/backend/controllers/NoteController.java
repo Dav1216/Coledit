@@ -15,11 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coledit.backend.dtos.NoteDTO;
+import com.coledit.backend.dtos.UserDTO;
 import com.coledit.backend.entities.Note;
 import com.coledit.backend.entities.User;
-import com.coledit.backend.entities.View;
 import com.coledit.backend.services.NoteService;
-import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 @RequestMapping("/note")
@@ -39,10 +38,10 @@ public class NoteController {
      * @return a ResponseEntity containing the created note.
      */
     @PostMapping("/create")
-    public ResponseEntity<Note> createNote(@RequestBody Note note) {
+    public ResponseEntity<NoteDTO> createNote(@RequestBody Note note) {
         Note createdNote = noteService.createNote(note);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdNote);
+        return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
     }
 
     /**
@@ -52,10 +51,10 @@ public class NoteController {
      * @return a ResponseEntity containing the note with the specified ID.
      */
     @GetMapping("/get/{id}")
-    public ResponseEntity<Note> getNoteById(@PathVariable(value = "id") String id) {
+    public ResponseEntity<NoteDTO> getNoteById(@PathVariable(value = "id") String id) {
         Note note = noteService.getNoteById(id);
         if (note != null) {
-            return ResponseEntity.ok(note);
+            return ResponseEntity.ok(convertToNoteDTO(note));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -67,9 +66,9 @@ public class NoteController {
      * @return a ResponseEntity containing a list of all notes.
      */
     @GetMapping("/getAll")
-    public ResponseEntity<List<Note>> getAllNotes() {
+    public ResponseEntity<List<NoteDTO>> getAllNotes() {
         List<Note> notes = noteService.getAllNotes();
-        return ResponseEntity.ok(notes);
+        return ResponseEntity.ok(notes.stream().map(NoteController::convertToNoteDTO).toList());
     }
 
     /**
@@ -80,10 +79,10 @@ public class NoteController {
      * @return a ResponseEntity containing the updated note.
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<Note> updateNote(@PathVariable(value = "id") String id, @RequestBody Note newNote) {
+    public ResponseEntity<NoteDTO> updateNote(@PathVariable(value = "id") String id, @RequestBody Note newNote) {
         Note updatedNote = noteService.updateNote(id, newNote);
         if (updatedNote != null) {
-            return ResponseEntity.ok(updatedNote);
+            return ResponseEntity.ok(convertToNoteDTO(updatedNote));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -106,10 +105,10 @@ public class NoteController {
     }
 
     @GetMapping("/getCollaborators/{noteId}")
-    public ResponseEntity<List<User>> getCollaborators(@PathVariable(value = "noteId") String noteId) {
+    public ResponseEntity<List<UserDTO>> getCollaborators(@PathVariable(value = "noteId") String noteId) {
         List<User> collaborators = noteService.getNoteCollaborators(noteId);
         if (collaborators != null) {
-            return ResponseEntity.ok(collaborators);
+            return ResponseEntity.ok(collaborators.stream().map(UserController::convertToUserDTO).toList());
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -123,10 +122,10 @@ public class NoteController {
      * @return a ResponseEntity containing the updated note.
      */
     @PostMapping("/addCollaborator")
-    public ResponseEntity<Note> addCollaborator(@RequestParam String noteId, @RequestParam String userEmail) {
+    public ResponseEntity<NoteDTO> addCollaborator(@RequestParam String noteId, @RequestParam String userEmail) {
         Note updatedNote = noteService.addCollaborator(noteId, userEmail);
         if (updatedNote != null) {
-            return ResponseEntity.ok(updatedNote);
+            return ResponseEntity.ok(convertToNoteDTO(updatedNote));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -140,10 +139,10 @@ public class NoteController {
      * @return a ResponseEntity containing the updated note.
      */
     @DeleteMapping("/removeCollaborator")
-    public ResponseEntity<Note> removeCollaborator(@RequestParam String noteId, @RequestParam String userEmail) {
+    public ResponseEntity<NoteDTO> removeCollaborator(@RequestParam String noteId, @RequestParam String userEmail) {
         Note updatedNote = noteService.removeCollaborator(noteId, userEmail);
         if (updatedNote != null) {
-            return ResponseEntity.ok(updatedNote);
+            return ResponseEntity.ok(convertToNoteDTO(updatedNote));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -157,21 +156,25 @@ public class NoteController {
      * @return a ResponseEntity containing a list of notes.
      */
     @GetMapping("/getByUserEmail/{userEmail}")
-    @JsonView(View.Summary.class)
-    public ResponseEntity<List<Note>> getNotesByUser(@PathVariable String userEmail) {
-        // List<NoteDTO> notesDTO = noteService.getNotesByUserEmail(userEmail).stream()
-        //         .map(note -> NoteDTO.builder().noteId(note.getNoteId())
-        //                 .content(note.getContent())
-        //                 .title(note.getTitle())
-        //                 .build())
-        //         .toList();
+    public ResponseEntity<List<NoteDTO>> getNotesByUser(@PathVariable String userEmail) {
+        List<NoteDTO> notesDTO = noteService.getNotesByUserEmail(userEmail).stream()
+                .map(NoteController::convertToNoteDTO)
+                .toList();
 
-        List<Note> notes = noteService.getNotesByUserEmail(userEmail);
-
-        if (notes != null && !notes.isEmpty()) {
-            return ResponseEntity.ok(notes);
+        if (notesDTO != null && !notesDTO.isEmpty()) {
+            return ResponseEntity.ok(notesDTO);
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    public static NoteDTO convertToNoteDTO(Note note) {
+        return NoteDTO.builder()
+                .noteId(note.getNoteId())
+                .title(note.getTitle())
+                .content(note.getContent())
+                .owner(note.getOwner().getUserId())
+                .collaborators(note.getCollaborators().stream().map(User::getUserId).toList())
+                .build();
     }
 }

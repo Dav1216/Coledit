@@ -1,19 +1,22 @@
 package com.coledit.backend.dtos;
 
+import java.util.List;
+import java.util.UUID;
+
+import com.coledit.backend.entities.Note;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Data Transfer Object (DTO) for registering a new user.
- * This class encapsulates user registration information such as email and password.
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class UserDTO {
-    // Represents the inputed email address
-    private String email;
-    // Represents the inputed password
-    private String password;
+        private UUID userId;
+        private String email;
+        private List<UUID> ownedNotes;
+        private List<UUID> collaboratedNotes;
 }
