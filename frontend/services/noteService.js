@@ -76,7 +76,7 @@ const createNote = async (data, userEmail) => {
         const response = await fetch(`https://${process.env.HOSTNAME}/api/note/create/${userEmail}`, {
             method: 'POST',
             body: JSON.stringify(data),
-            credentials: 'include' ,
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             }
@@ -84,6 +84,22 @@ const createNote = async (data, userEmail) => {
 
         if (!response.ok) {
             throw new Error('Failed to add collaborator');
+        }
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+const deleteNote = async (noteId) => {
+    try {
+        const response = await fetch(`https://${process.env.HOSTNAME}/api/note/delete/${noteId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete note');
         }
     } catch (error) {
         throw error;
@@ -154,4 +170,13 @@ const sendWebSocketMessage = (note, socketRef, versionNumberRef) => {
 };
 
 
-export default { fetchNotesByUserEmail, fetchCollaborators, addUserByEmail, initializeWebSocket, sendWebSocketMessage, createNote, removeUserByEmail };
+export default {
+    fetchNotesByUserEmail,
+    fetchCollaborators,
+    addUserByEmail,
+    initializeWebSocket,
+    sendWebSocketMessage,
+    createNote,
+    removeUserByEmail,
+    deleteNote
+};

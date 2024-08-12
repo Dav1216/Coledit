@@ -42,6 +42,7 @@ function Note({ note, setNote }) {
 
     try {
       noteService.addUserByEmail(noteId, email);
+      setIsPopupOpen(false);
     } catch (error) {
       console.error('Error:', error);
     }

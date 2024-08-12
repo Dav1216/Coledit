@@ -31,12 +31,23 @@ function NoteList(props) {
     );
   };
 
+  const deleteNote = async (noteId) => {
+    try {
+      await noteService.deleteNote(noteId);
+      setNotes(notes.filter(note => note.noteId !== noteId));
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
+  };
+  
+
   return (
     <div>
       <ul>
         {notes.map(note => (
           <li key={note.id} onClick={() => { setIsOpen(!isOpen); setSelectedNote(note) }}>
             {note.title}
+            <button onClick={(e) => { e.stopPropagation(); deleteNote(note.noteId); }}>Delete</button>
           </li>
         ))}
       </ul>
