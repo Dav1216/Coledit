@@ -54,6 +54,42 @@ const addUserByEmail = async (noteId, userEmail) => {
     }
 };
 
+const removeUserByEmail = async (noteId, userEmail) => {
+    try {
+        const response = await fetch(`https://${process.env.HOSTNAME}/api/note/removeCollaborator?noteId=${noteId}&userEmail=${userEmail}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to remove collaborator');
+        }
+    } catch (error) {
+        throw error;
+    }
+};
+
+const createNote = async (data, userEmail) => {
+    try {
+        const response = await fetch(`https://${process.env.HOSTNAME}/api/note/create/${userEmail}`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            credentials: 'include' ,
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add collaborator');
+        }
+    } catch (error) {
+        throw error;
+    }
+};
+
 const initializeWebSocket = (noteId, note, setNote, socketRef, heartbeatIntervalRef, versionNumberRef, lastContentFromServerRef) => {
     // Initialize WebSocket connection
     socketRef.current = new WebSocket(`wss://localhost/wsapp/document/${noteId}`);
@@ -118,4 +154,4 @@ const sendWebSocketMessage = (note, socketRef, versionNumberRef) => {
 };
 
 
-export default { fetchNotesByUserEmail, fetchCollaborators, addUserByEmail, initializeWebSocket, sendWebSocketMessage };
+export default { fetchNotesByUserEmail, fetchCollaborators, addUserByEmail, initializeWebSocket, sendWebSocketMessage, createNote, removeUserByEmail };

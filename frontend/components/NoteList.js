@@ -17,15 +17,11 @@ function NoteList(props) {
       console.error('Error fetching notes:', error);
     }
   };
-
+  
   useEffect(() => {
-    console.log("notes have been updated")
-    console.log(notes);
-  }, [notes]);
-
-  useEffect(() => {
+    console.log("here");
     fetchNotes();
-  }, [isOpen, props.userEmail]);
+  }, [isOpen, props.userEmail, props.popup]);
 
   const updateSelectedNote = (updatedNote) => {
     setSelectedNote(updatedNote);

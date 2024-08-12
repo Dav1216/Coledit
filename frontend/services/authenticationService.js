@@ -45,4 +45,23 @@ const sendSignUpCredentials = async (data) => {
 }
 
 
-export default { sendLogInCredentials, sendSignUpCredentials }
+const sendLogOutRequest = async () => {
+    // Set up the URL and data for the login request
+    const url = `https://${process.env.HOSTNAME}/api/auth/logout`;
+
+    try {
+        // Making the fetch request to the login API
+        const response = await fetch(url, {
+            method: 'POST',
+            credentials: 'include' 
+        });
+
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+
+export default { sendLogInCredentials, sendSignUpCredentials, sendLogOutRequest }

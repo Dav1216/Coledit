@@ -47,6 +47,14 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
     }
 
+    @PostMapping("/create/{userEmail}")
+    public ResponseEntity<NoteDTO> createNoteWithUserEmail(@PathVariable(value = "userEmail") String userEmail, @RequestBody NoteDTO noteDTO) {
+        noteDTO.setOwner(userService.getUserByEmail(userEmail).getUserId());
+        Note createdNote = noteService.createNote(convertToNote(noteDTO));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
+    }
+
     /**
      * Handles GET requests to retrieve a specific note by its ID.
      * 

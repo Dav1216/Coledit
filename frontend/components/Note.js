@@ -47,6 +47,16 @@ function Note({ note, setNote }) {
     }
   };
 
+  const removeUserByEmail = async (email) => {
+    const noteId = note.noteId;
+
+    try {
+      noteService.removeUserByEmail(noteId, email);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const textAreaOnChange = (e) => {
     const newContent = e.target.value;
     if (newContent.length <= 1000) {
@@ -75,7 +85,13 @@ function Note({ note, setNote }) {
       {isCollaboratorListVisible && (
         <ul>
           {users.map((user, index) => (
-            <li key={index}>{user.email}</li>
+            <li key={index}>{user.email}
+              <button onClick={() => {
+                removeUserByEmail(user.email);
+                setIsCollaboratorListVisible(false);
+              }
+              }>Remove</button>
+            </li>
           ))}
         </ul>
       )}
