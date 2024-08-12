@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.coledit.backend.builders.CookieBuilder;
 import com.coledit.backend.dtos.AuthenticationUserDTO;
-import com.coledit.backend.dtos.UserDTO;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.exceptions.EmailAlreadyInUseException;
 import com.coledit.backend.repositories.UserRepository;

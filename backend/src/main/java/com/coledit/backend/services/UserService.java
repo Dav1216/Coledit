@@ -47,6 +47,11 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 
+    public User getUserByUUID(UUID id) {
+        return userRepository.findByUserId(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+    }
+
     /**
      * Retrieves a user by their email address.
      * 
@@ -127,4 +132,9 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    public List<User> getUsersByUserIds(List<UUID> userIds) {
+        return userRepository.findAllByUserId(userIds);
+    }
+
 }

@@ -117,4 +117,12 @@ public class NoteService {
         List<User> noteCollaborators = noteRepository.findCollaboratorsByNoteId(UUID.fromString(noteId));
         return noteCollaborators;
     }
+
+    public List<Note> getOwnedNotes(UUID userId) {
+        return noteRepository.findByOwnerId(userId);
+    }
+
+    public List<Note> getCollaboratedNotes(UUID userId) {
+        return noteRepository.findByCollaboratorId(userId);
+    }
 }

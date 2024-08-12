@@ -8,7 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.coledit.backend.dtos.AuthenticationUserDTO;
-import com.coledit.backend.dtos.UserDTO;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.repositories.UserRepository;
 

@@ -19,16 +19,19 @@ import com.coledit.backend.dtos.UserDTO;
 import com.coledit.backend.entities.Note;
 import com.coledit.backend.entities.User;
 import com.coledit.backend.services.NoteService;
+import com.coledit.backend.services.UserService;
 
 @RestController
 @RequestMapping("/note")
 public class NoteController {
 
     private final NoteService noteService;
+    private final UserService userService;
 
     @Autowired
-    public NoteController(NoteService noteService) {
+    public NoteController(NoteService noteService, UserService userService) {
         this.noteService = noteService;
+        this.userService = userService;
     }
 
     /**
@@ -38,8 +41,8 @@ public class NoteController {
      * @return a ResponseEntity containing the created note.
      */
     @PostMapping("/create")
-    public ResponseEntity<NoteDTO> createNote(@RequestBody Note note) {
-        Note createdNote = noteService.createNote(note);
+    public ResponseEntity<NoteDTO> createNote(@RequestBody NoteDTO noteDTO) {
+        Note createdNote = noteService.createNote(convertToNote(noteDTO));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
     }
@@ -79,8 +82,8 @@ public class NoteController {
      * @return a ResponseEntity containing the updated note.
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<NoteDTO> updateNote(@PathVariable(value = "id") String id, @RequestBody Note newNote) {
-        Note updatedNote = noteService.updateNote(id, newNote);
+    public ResponseEntity<NoteDTO> updateNote(@PathVariable(value = "id") String id, @RequestBody NoteDTO newNote) {
+        Note updatedNote = noteService.updateNote(id, convertToNote(newNote));
         if (updatedNote != null) {
             return ResponseEntity.ok(convertToNoteDTO(updatedNote));
         } else {
@@ -175,6 +178,19 @@ public class NoteController {
                 .content(note.getContent())
                 .owner(note.getOwner().getUserId())
                 .collaborators(note.getCollaborators().stream().map(User::getUserId).toList())
+                .build();
+    }
+
+    public Note convertToNote(NoteDTO noteDTO) {
+        User owner = userService.getUserByUUID(noteDTO.getOwner());
+        List<User> collaborators = userService.getUsersByUserIds(noteDTO.getCollaborators());
+
+        return Note.builder()
+                .noteId(noteDTO.getNoteId())
+                .title(noteDTO.getTitle())
+                .content(noteDTO.getContent())
+                .owner(owner)
+                .collaborators(collaborators)
                 .build();
     }
 }

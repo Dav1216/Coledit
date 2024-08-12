@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.coledit.backend.dtos.UserDTO;
 import com.coledit.backend.entities.Note;
 import com.coledit.backend.entities.User;
+import com.coledit.backend.services.NoteService;
 import com.coledit.backend.services.UserService;
 
 /**
@@ -28,11 +29,13 @@ import com.coledit.backend.services.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final NoteService noteService;
 
     // Constructor injection of the UserService
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, NoteService noteService) {
         this.userService = userService;
+        this.noteService = noteService;
     }
 
     /**
@@ -82,8 +85,8 @@ public class UserController {
      * @return a ResponseEntity containing the updated user.
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable(value = "id") String id, @RequestBody User newUser) {
-        return ResponseEntity.ok(convertToUserDTO(userService.updateUser(id, newUser)));
+    public ResponseEntity<UserDTO> updateUser(@PathVariable(value = "id") String id, @RequestBody UserDTO newUser) {
+        return ResponseEntity.ok(convertToUserDTO(userService.updateUser(id, convertToUser(newUser))));
     }
 
     /**
@@ -105,8 +108,8 @@ public class UserController {
      * @return a ResponseEntity containing the added user.
      */
     @PostMapping(path = "/add")
-    public ResponseEntity<UserDTO> addUser(@RequestBody User user) {
-        return ResponseEntity.ok(convertToUserDTO(userService.addUser(user)));
+    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(convertToUserDTO(userService.addUser(convertToUser(userDTO))));
     }
 
     /**
@@ -126,6 +129,18 @@ public class UserController {
                 .email(user.getEmail())
                 .ownedNotes(user.getOwnedNotes().stream().map(Note::getNoteId).toList())
                 .collaboratedNotes(user.getCollaboratedNotes().stream().map(Note::getNoteId).toList())
+                .build();
+    }
+
+    public User convertToUser(UserDTO userDTO) {
+        List<Note> ownedNotes = noteService.getOwnedNotes(userDTO.getUserId());
+        List<Note> collaboratedNotes = noteService.getCollaboratedNotes(userDTO.getUserId());
+
+        return User.builder()
+                .userId(userDTO.getUserId())
+                .email(userDTO.getEmail())
+                .ownedNotes(ownedNotes)
+                .collaboratedNotes(collaboratedNotes)
                 .build();
     }
 }

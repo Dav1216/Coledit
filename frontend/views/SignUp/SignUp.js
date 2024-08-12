@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import authenticationService from '../../services/authenticationService';
 
 /**
  * Function component for the Sign-up Page.
@@ -44,22 +45,13 @@ export default function SignUp() {
       return;
     }
 
-    // Set up the URL and data for the sign-up request
-    const url = `https://${process.env.HOSTNAME}/api/auth/signup`;
     const data = {
       email: formData.email,
       password: formData.password
     };
-
+  
     try {
-      // Making the fetch request to the sign-up API
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
+      const response = await authenticationService.sendSignUpCredentials(data);
 
       // Check if the response is successful
       // If the response is unsuccessful, throw an error

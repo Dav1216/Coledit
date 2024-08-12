@@ -44,8 +44,6 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID userId;
-
-    private String userName;
     private String email;
     private String hashPassword;
     private String roles;

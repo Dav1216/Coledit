@@ -23,8 +23,6 @@ function NoteList(props) {
     console.log(notes);
   }, [notes]);
 
-  
-
   useEffect(() => {
     fetchNotes();
   }, [isOpen, props.userEmail]);
@@ -33,7 +31,7 @@ function NoteList(props) {
     setSelectedNote(updatedNote);
     setNotes((prevNotes) =>
       prevNotes.map((note) => (note.noteId === updatedNote.noteId ? updatedNote : note))
-        .sort((a, b) => a.noteId - b.noteId) 
+        .sort((a, b) => a.noteId - b.noteId)
     );
   };
 
@@ -41,7 +39,7 @@ function NoteList(props) {
     <div>
       <ul>
         {notes.map(note => (
-          <li key={note.id} onClick={() => {setIsOpen(!isOpen); setSelectedNote(note)}}>
+          <li key={note.id} onClick={() => { setIsOpen(!isOpen); setSelectedNote(note) }}>
             {note.title}
           </li>
         ))}
