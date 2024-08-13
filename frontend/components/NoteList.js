@@ -1,27 +1,30 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Note from './Note';
 import noteService from './../services/noteService';
+import UserContext from '../contexts/UserContext';
 
-function NoteList(props) {
+function NoteList() {
+  const { userEmail, userId } = useContext(UserContext);
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [noteTitle, setNoteTitle] = useState('');
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const fetchNotes = async () => {
     try {
-      let fetchedNotes = await noteService.fetchNotesByUserEmail(props.userEmail);
+      let fetchedNotes = await noteService.fetchNotesByUserEmail(userEmail);
       fetchedNotes.sort((a, b) => a.noteId - b.noteId);
       setNotes(fetchedNotes);
     } catch (error) {
       console.error('Error fetching notes:', error);
     }
   };
-  
+
   useEffect(() => {
-    console.log("here");
     fetchNotes();
-  }, [isOpen, props.userEmail, props.popup]);
+  }, [isOpen, userEmail]);
 
   const updateSelectedNote = (updatedNote) => {
     setSelectedNote(updatedNote);
@@ -39,20 +42,63 @@ function NoteList(props) {
       console.error('Error deleting note:', error);
     }
   };
-  
+
+  const handleAddNote = () => {
+    setIsPopupVisible(true);
+  };
+
+  const handleSubmitNoteTitle = async () => {
+    const data = {
+      title: noteTitle
+    };
+
+    await noteService.createNote(data, userEmail);
+    setNoteTitle('');
+    setIsPopupVisible(false);
+
+    fetchNotes();
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupVisible(false);
+  };
 
   return (
     <div>
+      <button onClick={handleAddNote}>Add Note</button>
+      {isPopupVisible && (
+        <div>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmitNoteTitle();
+          }}>
+            <input
+              type="text"
+              placeholder="Enter note title..."
+              value={noteTitle}
+              onChange={(e) => setNoteTitle(e.target.value)}
+            />
+            <button type="submit">Save</button>
+            <button onClick={handleClosePopup}>Cancel</button>
+          </form>
+        </div>
+      )}
       <ul>
         {notes.map(note => (
           <li key={note.id} onClick={() => { setIsOpen(!isOpen); setSelectedNote(note) }}>
             {note.title}
-            <button onClick={(e) => { e.stopPropagation(); deleteNote(note.noteId); }}>Delete</button>
+            <button onClick={(e) => {
+              e.stopPropagation(); if (note.owner === userId) {
+                deleteNote(note.noteId);
+              } else {
+                alert("Only the owner can delete this note.");
+              }
+            }}>Delete</button>
           </li>
         ))}
       </ul>
       {isOpen && selectedNote ? (
-        <Note note={selectedNote} setNote={updateSelectedNote} />
+        <Note note={selectedNote} setNote={updateSelectedNote} fetchNotes={fetchNotes} />
       ) : (
         <p>Select a note to view its content</p>
       )}

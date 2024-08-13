@@ -77,7 +77,8 @@ public class AuthenticationController {
      * @return a success message or error status if authentication fails
      */
     @PostMapping("/login")
-    public ResponseEntity<String> authenticate(@RequestBody AuthenticationUserDTO loginUserDto, HttpServletResponse request,
+    public ResponseEntity<String> authenticate(@RequestBody AuthenticationUserDTO loginUserDto,
+            HttpServletResponse request,
             HttpServletResponse response) {
         try {
             User authenticatedUser = authenticationService.authenticate(loginUserDto);
@@ -107,6 +108,19 @@ public class AuthenticationController {
                     .setSameSite("Lax")
                     .build();
             response.addCookie(emailCookie);
+
+            // Set the id token in a simple cookie, not HTTPOnly
+            Cookie idCookie = new CookieBuilder()
+                    .setName("userId")
+                    .setValue(authenticatedUser.getUserId().toString())
+                    .setHttpOnly(false)
+                    .setSecure(true)
+                    .setPath("/")
+                    .setMaxAge((int) jwtService.getExpirationTime())
+                    .setSameSite("Lax")
+                    .build();
+
+            response.addCookie(idCookie);
 
             return ResponseEntity.ok("Successfully authenticated!");
 
@@ -154,6 +168,17 @@ public class AuthenticationController {
                 .setMaxAge(0)
                 .build();
         response.addCookie(emailCookie);
+
+        // Set the invalidated id in a simple cookie, not HTTPOnly
+        Cookie idCookie = new CookieBuilder()
+                .setName("userId")
+                .setValue(null)
+                .setHttpOnly(false)
+                .setSecure(true)
+                .setPath("/")
+                .setMaxAge(0)
+                .build();
+        response.addCookie(idCookie);
 
         return ResponseEntity.ok("Successfully logged out!");
     }

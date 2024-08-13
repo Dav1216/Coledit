@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import noteService from './../services/noteService';
+import UserContext from '../contexts/UserContext';
 
-function Note({ note, setNote }) {
+function Note({ note, setNote, fetchNotes }) {
+  const { userEmail, userId } = useContext(UserContext);
+
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [isCollaboratorListVisible, setIsCollaboratorListVisible] = useState(false);
@@ -39,22 +42,30 @@ function Note({ note, setNote }) {
     e.preventDefault();
     const email = e.target.elements.email.value;
     const noteId = note.noteId;
-
-    try {
-      noteService.addUserByEmail(noteId, email);
-      setIsPopupOpen(false);
-    } catch (error) {
-      console.error('Error:', error);
+    if (userId === note.owner) {
+      try {
+        await noteService.addUserByEmail(noteId, email);
+        fetchCollaborators();
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    } else {
+      alert("Only the owner can add users to this note.");
     }
   };
 
   const removeUserByEmail = async (email) => {
     const noteId = note.noteId;
-
-    try {
-      noteService.removeUserByEmail(noteId, email);
-    } catch (error) {
-      console.error('Error:', error);
+    if (userId === note.owner || email === userEmail) {
+      try {
+        await noteService.removeUserByEmail(noteId, email);
+        fetchCollaborators();
+        fetchNotes();
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    } else {
+      alert("Only the owner or the user themselves can remove the user from this note.");
     }
   };
 
