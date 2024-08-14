@@ -18,7 +18,10 @@ function Note({ note, setNote, fetchNotes }) {
   useEffect(() => {
     const cleanup = noteService.initializeWebSocket(note.noteId, note, setNote, socketRef, heartbeatIntervalRef, versionNumberRef, lastContentFromServerRef);
 
-    return cleanup;
+    return () => {
+      cleanup();
+      isFirstRenderRef.current = true; // Reset the flag on component unmount
+    };
   }, []);
 
   useEffect(() => {
@@ -37,14 +40,18 @@ function Note({ note, setNote, fetchNotes }) {
   useEffect(() => {
     if (isFirstRenderRef.current) {
       // This block runs only on the initial render
-      lastContentFromServerRef.current = note.content;
+      if (note.content == null) {
+        lastContentFromServerRef.current = "";
+      } else {
+        lastContentFromServerRef.current = note.content;
+      }
       isFirstRenderRef.current = false;
     }
 
     // This part runs on every render where note.content changes
-    if (!note.content || !lastContentFromServerRef.current) {
+    if (note.content == null || lastContentFromServerRef.current == null) {
       return;
-    }
+    }  
 
     if (note.content !== lastContentFromServerRef.current) {
       versionNumberRef.current++;

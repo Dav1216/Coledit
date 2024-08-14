@@ -116,7 +116,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
 
         // check if the document is the next version awaited by the server
         if (version == documentVersionCounter.getOrDefault(documentId, 0) + 1) {
-        latestVariants.add(newContent);
+            latestVariants.add(newContent);
         }
 
         synchronized (latestVariants) {
