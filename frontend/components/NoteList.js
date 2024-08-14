@@ -14,7 +14,7 @@ function NoteList() {
   const fetchNotes = async () => {
     try {
       let fetchedNotes = await noteService.fetchNotesByUserEmail(userEmail);
-      fetchedNotes.sort((a, b) => a.noteId - b.noteId);
+      fetchedNotes.sort((a, b) => a.noteId.localeCompare(b.noteId));
       setNotes(fetchedNotes);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -29,7 +29,7 @@ function NoteList() {
     setSelectedNote(updatedNote);
     setNotes((prevNotes) =>
       prevNotes.map((note) => (note.noteId === updatedNote.noteId ? updatedNote : note))
-        .sort((a, b) => a.noteId - b.noteId)
+        .sort((a, b) => a.noteId.localeCompare(b.noteId))
     );
   };
 
@@ -84,7 +84,7 @@ function NoteList() {
       )}
       <ul>
         {notes.map(note => (
-          <li key={note.id} onClick={() => {  setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
+          <li key={note.id} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
             {note.title}
             <button onClick={(e) => {
               e.stopPropagation(); if (note.owner === userId) {

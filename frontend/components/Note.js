@@ -18,10 +18,7 @@ function Note({ note, setNote, fetchNotes }) {
   useEffect(() => {
     const cleanup = noteService.initializeWebSocket(note.noteId, note, setNote, socketRef, heartbeatIntervalRef, versionNumberRef, lastContentFromServerRef);
 
-    return () => {
-      cleanup();
-      isFirstRenderRef.current = true; // Reset the flag on component unmount
-    };
+    return cleanup;
   }, []);
 
   useEffect(() => {
