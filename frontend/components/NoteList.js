@@ -8,7 +8,6 @@ function NoteList() {
   const { userEmail, userId } = useContext(UserContext);
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState('');
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
@@ -24,7 +23,7 @@ function NoteList() {
 
   useEffect(() => {
     fetchNotes();
-  }, [isOpen, userEmail]);
+  }, [selectedNote, userEmail]);
 
   const updateSelectedNote = (updatedNote) => {
     setSelectedNote(updatedNote);
@@ -85,7 +84,7 @@ function NoteList() {
       )}
       <ul>
         {notes.map(note => (
-          <li key={note.id} onClick={() => { setIsOpen(!isOpen); setSelectedNote(note) }}>
+          <li key={note.id} onClick={() => {  setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
             {note.title}
             <button onClick={(e) => {
               e.stopPropagation(); if (note.owner === userId) {
@@ -97,7 +96,7 @@ function NoteList() {
           </li>
         ))}
       </ul>
-      {isOpen && selectedNote ? (
+      {selectedNote ? (
         <Note note={selectedNote} setNote={updateSelectedNote} fetchNotes={fetchNotes} />
       ) : (
         <p>Select a note to view its content</p>

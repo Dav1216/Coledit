@@ -130,8 +130,7 @@ const initializeWebSocket = (noteId, note, setNote, socketRef, heartbeatInterval
                         ...note,
                         content: data.payload
                     };
-                    lastContentFromServerRef.current = updatedNote;
-
+                    lastContentFromServerRef.current = updatedNote.content;
                     setNote(updatedNote);
                     versionNumberRef.current = data.version;
                 }

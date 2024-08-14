@@ -113,10 +113,18 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         String documentId = getDocumentId(session);
         List<String> latestVariants = latestDocumentVariants.computeIfAbsent(documentId,
                 k -> Collections.synchronizedList(new ArrayList<>()));
+
+        // check if the document is the next version awaited by the server
+        if (version == documentVersionCounter.getOrDefault(documentId, 0) + 1) {
         latestVariants.add(newContent);
+        }
 
         synchronized (latestVariants) {
-            if (version >= documentVersionCounter.getOrDefault(documentId, 0)) {
+            // the if is inside so that documentVersionCounter isn't tampered with
+            if (version == documentVersionCounter.getOrDefault(documentId, 0) + 1) {
+                // only a thread that provided a version awaited by the server (logically next
+                // in line)
+                // can broadcast the changes
                 String latestMergedVersion = StringMerger.mergeVariants(
                         latestDocumentContent.getOrDefault(documentId, ""),
                         latestVariants);

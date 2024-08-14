@@ -12,10 +12,13 @@ function Note({ note, setNote, fetchNotes }) {
   const socketRef = useRef();
   const heartbeatIntervalRef = useRef();
   const versionNumberRef = useRef(0);
-  const lastContentFromServerRef = useRef(null); // Track the last sent content
+  const lastContentFromServerRef = useRef(null); // Track the last received content from server for this note
+  const isFirstRenderRef = useRef(true); // Flag to track the first render
 
   useEffect(() => {
-    noteService.initializeWebSocket(note.noteId, note, setNote, socketRef, heartbeatIntervalRef, versionNumberRef, lastContentFromServerRef);
+    const cleanup = noteService.initializeWebSocket(note.noteId, note, setNote, socketRef, heartbeatIntervalRef, versionNumberRef, lastContentFromServerRef);
+
+    return cleanup;
   }, []);
 
   useEffect(() => {
@@ -32,7 +35,18 @@ function Note({ note, setNote, fetchNotes }) {
   };
 
   useEffect(() => {
-    if (note.content !== lastContentFromServerRef.current?.content) {
+    if (isFirstRenderRef.current) {
+      // This block runs only on the initial render
+      lastContentFromServerRef.current = note.content;
+      isFirstRenderRef.current = false;
+    }
+
+    // This part runs on every render where note.content changes
+    if (!note.content || !lastContentFromServerRef.current) {
+      return;
+    }
+
+    if (note.content !== lastContentFromServerRef.current) {
       versionNumberRef.current++;
       noteService.sendWebSocketMessage(note, socketRef, versionNumberRef);
     }
@@ -45,9 +59,11 @@ function Note({ note, setNote, fetchNotes }) {
     if (userId === note.owner) {
       try {
         await noteService.addUserByEmail(noteId, email);
-        fetchCollaborators();
+        await fetchCollaborators();
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        setIsPopupOpen(false);
       }
     } else {
       alert("Only the owner can add users to this note.");
@@ -83,6 +99,12 @@ function Note({ note, setNote, fetchNotes }) {
     }
   }
 
+  const handleRemoveOnClick = (userEmail) => {
+    removeUserByEmail(userEmail);
+    setIsCollaboratorListVisible(false);
+  }
+
+
   return (
     <div className='note'>
       <h2>{note.title}</h2>
@@ -98,10 +120,8 @@ function Note({ note, setNote, fetchNotes }) {
         <ul>
           {users.map((user, index) => (
             <li key={index}>{user.email}
-              <button onClick={() => {
-                removeUserByEmail(user.email);
-                setIsCollaboratorListVisible(false);
-              }
+              <button onClick={() =>
+                handleRemoveOnClick(user.email)
               }>Remove</button>
             </li>
           ))}
