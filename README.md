@@ -49,7 +49,13 @@ To execute backend tests, use:
 docker exec -it backend mvn test
 ```
 
-To access the frontend of the application enter the following URL in your preferred browser: 
-https://localhost/
+You can open two different browsers. To access the frontend of the application enter the following URL in your preferred browsers: https://localhost/
+
+Log in with the provided email addresses and passwords. Use one for each browser tab:
+
+- **Email**: user1@example.com, **Password**: pass1
+- **Email**: user2@example.com, **Password**: pass2
+
+You can then proceed to experiment with the application as shown in the tutorial video.
 
 

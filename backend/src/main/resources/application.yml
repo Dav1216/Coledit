@@ -43,6 +43,3 @@ security:
 
 custom:
   hostname: ${HOSTNAME} # Custom hostname configuration
-  # Chief account that it is created when the app is built
-  chiefemail: ${CHIEF_EMAIL}
-  chiefpassword: ${CHIEF_PASSWORD}

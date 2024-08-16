@@ -111,7 +111,7 @@ const initializeWebSocket = (noteId, note, setNote, socketRef, heartbeatInterval
     socketRef.current = new WebSocket(`wss://localhost/wsapp/document/${noteId}`);
 
     socketRef.current.onopen = () => {
-        console.log('Connected to WebSocket');
+        // console.log('Connected to WebSocket');
 
         // Start sending heartbeat messages every 30 seconds
         heartbeatIntervalRef.current = setInterval(() => {
@@ -130,6 +130,9 @@ const initializeWebSocket = (noteId, note, setNote, socketRef, heartbeatInterval
                         ...note,
                         content: data.payload
                     };
+                    console.log("received ", updatedNote.content);
+                    console.log("version", data.version);
+
                     lastContentFromServerRef.current = updatedNote.content;
                     setNote(updatedNote);
                     versionNumberRef.current = data.version;
@@ -144,7 +147,7 @@ const initializeWebSocket = (noteId, note, setNote, socketRef, heartbeatInterval
         };
 
         socketRef.current.onclose = () => {
-            console.log('Disconnected from WebSocket');
+            // console.log('Disconnected from WebSocket');
         };
     };
 

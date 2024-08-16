@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import noteService from './../services/noteService';
 import UserContext from '../contexts/UserContext';
 
+const UNINITIALIZED_VALUE = "__UNINITIALIZED__";
+
 function Note({ note, setNote, fetchNotes }) {
   const { userEmail, userId } = useContext(UserContext);
 
@@ -12,13 +14,12 @@ function Note({ note, setNote, fetchNotes }) {
   const socketRef = useRef();
   const heartbeatIntervalRef = useRef();
   const versionNumberRef = useRef(0);
-  const lastContentFromServerRef = useRef(null); // Track the last received content from server for this note
-  const isFirstRenderRef = useRef(true); // Flag to track the first render
+  const lastContentFromServerRef = useRef(UNINITIALIZED_VALUE); // Track the last received content from server for this note
 
   useEffect(() => {
     const cleanup = noteService.initializeWebSocket(note.noteId, note, setNote, socketRef, heartbeatIntervalRef, versionNumberRef, lastContentFromServerRef);
 
-    return cleanup;
+    return () => { cleanup(); versionNumberRef.current = 0; };
   }, []);
 
   useEffect(() => {
@@ -35,26 +36,21 @@ function Note({ note, setNote, fetchNotes }) {
   };
 
   useEffect(() => {
-    if (isFirstRenderRef.current) {
-      // This block runs only on the initial render
-      if (note.content == null) {
-        lastContentFromServerRef.current = "";
-      } else {
-        lastContentFromServerRef.current = note.content;
-      }
-      isFirstRenderRef.current = false;
-    }
-
-    // This part runs on every render where note.content changes
-    if (note.content == null || lastContentFromServerRef.current == null) {
+    console.log("note.content", note.content);
+    console.log("last content from server", lastContentFromServerRef.current);
+    
+    if (note.content === "" && lastContentFromServerRef.current === UNINITIALIZED_VALUE) {
       return;
-    }  
+    }
 
     if (note.content !== lastContentFromServerRef.current) {
       versionNumberRef.current++;
+      console.log("versionNumberRef.current ", versionNumberRef.current);
       noteService.sendWebSocketMessage(note, socketRef, versionNumberRef);
+      lastContentFromServerRef.current = note.content;
     }
   }, [note.content]);
+
 
   const addUserByEmail = async (e) => {
     e.preventDefault();

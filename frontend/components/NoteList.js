@@ -21,6 +21,16 @@ function NoteList() {
     }
   };
 
+  // fetch in the background, maybe some other user added the current user as
+  // a collaborator to one of their notes
+  useEffect(() => {
+    const intervalId = setInterval(fetchNotes, 2000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [userEmail]);
+
   useEffect(() => {
     fetchNotes();
   }, [selectedNote, userEmail]);
@@ -84,7 +94,7 @@ function NoteList() {
       )}
       <ul>
         {notes.map(note => (
-          <li key={note.id} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
+          <li key={note.noteId} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
             {note.title}
             <button onClick={(e) => {
               e.stopPropagation(); if (note.owner === userId) {

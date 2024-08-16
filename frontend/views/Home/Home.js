@@ -24,6 +24,13 @@ function Home() {
     } else {
       router.push('/log-in');
     }
+
+    // hard timeout since jwt will also expire after this time
+    const timeoutId = setTimeout(handleLogout, 25 * 60 * 1000); 
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleLogout = async () => {

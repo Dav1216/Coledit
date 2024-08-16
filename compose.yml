@@ -12,9 +12,6 @@ services:
       - POSTGRES_PASSWORD=${PG_PWD}
       - POSTGRES_DB=${PG_DB}
       - HOSTNAME=${DOMAIN_NAME}
-      - KEY_PASSWORD=${KEY_PASSWORD}
-      - CHIEF_EMAIL=${CHIEF_EMAIL}
-      - CHIEF_PASSWORD=${CHIEF_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     ports:
       - "8080:8080"

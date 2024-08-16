@@ -21,6 +21,7 @@ import com.coledit.backend.entities.User;
 import com.coledit.backend.services.NoteService;
 import com.coledit.backend.services.UserService;
 
+
 @RestController
 @RequestMapping("/note")
 public class NoteController {
@@ -34,19 +35,21 @@ public class NoteController {
         this.userService = userService;
     }
 
-    // /**
-    //  * Handles POST requests to create a new note.
-    //  * 
-    //  * @param note the note to create.
-    //  * @return a ResponseEntity containing the created note.
-    //  */
-    // @PostMapping("/create")
-    // public ResponseEntity<NoteDTO> createNote(@RequestBody NoteDTO noteDTO) {
-    //     Note createdNote = noteService.createNote(convertToNote(noteDTO));
+    /**
+     * Handles POST requests to create a new note.
+     * 
+     * @param note the note to create.
+     * @return a ResponseEntity containing the created note.
+     */
+    /* 
+    @PostMapping("/create")
+    public ResponseEntity<NoteDTO> createNote(@RequestBody NoteDTO noteDTO) {
+        Note createdNote = noteService.createNote(convertToNote(noteDTO));
 
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
-    // }
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
+    }
+    */
+    
     @PostMapping("/create/{userEmail}")
     public ResponseEntity<NoteDTO> createNoteWithUserEmail(@PathVariable(value = "userEmail") String userEmail, @RequestBody NoteDTO noteDTO) {
         noteDTO.setOwner(userService.getUserByEmail(userEmail).getUserId());

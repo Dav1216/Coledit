@@ -61,7 +61,8 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
             }
         }
 
-        System.out.println("Session " + session.getId() + " connected to document " + documentId);
+        // System.out.println("Session " + session.getId() + " connected to document " +
+        // documentId);
     }
 
     @Override
@@ -74,8 +75,8 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         if (sessions != null) {
             sessions.remove(session);
             if (sessions.isEmpty()) {
-                String latestContent = latestDocumentContent.getOrDefault(documentId, "");
-                if (!latestContent.isEmpty()) {
+                String latestContent = latestDocumentContent.get(documentId);
+                if (latestContent != null) {
                     noteService.updateNoteContent(documentId, latestContent);
                 }
                 latestDocumentContent.remove(documentId);
@@ -88,7 +89,8 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
             }
         }
 
-        System.out.println("Session " + session.getId() + " disconnected from document " + documentId);
+        // System.out.println("Session " + session.getId() + " disconnected from
+        // document " + documentId);
     }
 
     @Override
@@ -120,17 +122,31 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         }
 
         synchronized (latestVariants) {
-            // the if is inside so that documentVersionCounter isn't tampered with
+            // Only a thread that provided the next expected version can broadcast the
+            // merged changes.
+            // This ensures that updates are processed in the correct order.
             if (version == documentVersionCounter.getOrDefault(documentId, 0) + 1) {
-                // only a thread that provided a version awaited by the server (logically next
-                // in line)
-                // can broadcast the changes
+                // Increment the current expected version.
+                // This prevents other threads from adding outdated versions to the
+                // latestVariants list.
+                // It also ensures that older versions won't be used in future calculations.
+                // This also prevents a race condition between latestVariants.clear() and
+                // latestVariants.add(newContent).
+                Integer currentValue = documentVersionCounter.getOrDefault(documentId, 0);
+                documentVersionCounter.put(documentId, currentValue + 1);
+
+                // Calculate the merged version based on the latest variants.
                 String latestMergedVersion = StringMerger.mergeVariants(
                         latestDocumentContent.getOrDefault(documentId, ""),
                         latestVariants);
-                updateLatestDocumentContent(documentId, latestMergedVersion);
-                latestVariants.clear();
+        
+                // Update the last tracked value of the content to be the merged version.
+                latestDocumentContent.put(documentId, latestMergedVersion);
+
+                // Broadcast the update to notify other components of the new version.
                 broadcastUpdateNotification(session, documentId, latestMergedVersion);
+                // Clear the latestVariants list to prepare for the next set of updates.
+                latestVariants.clear();
             }
         }
     }
@@ -171,12 +187,6 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         return null;
     }
 
-    private void updateLatestDocumentContent(String documentId, String newContent) {
-        latestDocumentContent.put(documentId, newContent);
-
-        Integer currentValue = documentVersionCounter.getOrDefault(documentId, 0);
-        documentVersionCounter.put(documentId, currentValue + 1);
-    }
 
     private void broadcastUpdateNotification(WebSocketSession session, String documentId, String newContent)
             throws IOException {
