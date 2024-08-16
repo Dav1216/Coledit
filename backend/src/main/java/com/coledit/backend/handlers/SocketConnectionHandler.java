@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SocketConnectionHandler extends TextWebSocketHandler {
 
     private final Map<String, List<WebSocketSession>> documentSessions = new ConcurrentHashMap<>();
+    
     private final Map<String, String> latestDocumentContent = new ConcurrentHashMap<>();
     private final Map<String, List<String>> latestDocumentVariants = new ConcurrentHashMap<>();
     private final Map<String, Integer> documentVersionCounter = new ConcurrentHashMap<>();

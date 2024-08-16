@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import authenticationService from '../../services/authenticationService';
+import './../AuthFormStyles/Auth.css';
 
 /**
  * Function component for the Sign-up Page.
@@ -70,7 +71,7 @@ export default function SignUp() {
   };
 
   return (
-    <div>
+    <div className="form-container">
       <h2>Create an account</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -124,7 +125,7 @@ export default function SignUp() {
           <button type="submit">Sign up</button>
         </div>
       </form>
-      <p>
+      <p className="alternative-authentication">
         Already have an account? <Link href="/log-in">Log in</Link>
       </p>
     </div>

@@ -80,7 +80,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 break;
 
             case "GET", "UPDATE", "DELETE":
-                // athorization for accessing a collaborative edditing session with WebSocket
+                // authorization for accessing a collaborative edditing session with WebSocket
                 if (requestURI.startsWith("/document")) {
                     String noteId = extractPathVarFromRequest(requestURI, 2);
                     if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
@@ -118,7 +118,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 if (requestURI.startsWith("/note/removeCollaborator")) {
                     Map<String, String[]> queryParams = request.getParameterMap();
                     String[] noteIds = queryParams.get("noteId");
-                    String[] userIds = queryParams.get("userId");
+                    String[] userIds = queryParams.get("userEmail");
 
                     if (noteIds == null || userIds == null || noteIds.length == 0 || userIds.length == 0) {
                         response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters

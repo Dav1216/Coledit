@@ -35,7 +35,7 @@ public class SecurityConfiguration {
      * dependencies.
      *
      * @param jwtAuthenticationFilter the custom JWT authentication filter
-     * @param authenticationProvider the custom authentication provider
+     * @param authenticationProvider  the custom authentication provider
      */
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -57,25 +57,24 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // Disables CSRF protection
                 .authorizeHttpRequests(auth -> auth
-                // Developer setup
-                .requestMatchers("/**").permitAll() // Allows requests to /auth/** without authentication
-                // .requestMatchers("/error").permitAll()
-                // // // Authentication endpoints
-                // .requestMatchers("/auth/**").permitAll()
-                // .requestMatchers("/user/add").hasAnyAuthority("CHIEF", "EDITOR", "USER", "ROLE_ADMIN")
-                // .anyRequest().authenticated() // Requires authentication for all other requests
+                        // Developer setup
+                        .requestMatchers("/**").permitAll() // Allows requests to /auth/** without authentication
+                        .anyRequest().authenticated() // Requires authentication for all other requests
                 )
                 .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Configures session management to be
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Configures session management to be
                 // stateless
                 )
                 .authenticationProvider(authenticationProvider) // Sets the custom authentication provider
-                // Adds the JWT authentication filter before the username-password authentication filter
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT Authentication Filter
-                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class) 
-                .cors(c -> c.configurationSource(corsConfigurationSource()))      // Configures CORS
+                // Adds the JWT authentication filter before the username-password
+                // authentication filter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT
+                                                                                                      // Authentication
+                                                                                                      // Filter
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(c -> c.configurationSource(corsConfigurationSource())) // Configures CORS
                 .requiresChannel(channel -> channel
-                .anyRequest()); // Requires HTTPS for all requests
+                        .anyRequest()); // Requires HTTPS for all requests
 
         return http.build();
     }
@@ -90,8 +89,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         // Sets the allowed origins for CORS
         configuration.setAllowedOrigins(List.of(
-                "https://" + hostname
-              ));
+                "https://" + hostname));
         // Sets the allowed HTTP methods for CORS
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS", "DELETE"));
         // Allows all headers for CORS

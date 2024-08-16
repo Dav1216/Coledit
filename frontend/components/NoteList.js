@@ -3,6 +3,7 @@ import { useState, useEffect, useContext } from 'react';
 import Note from './Note';
 import noteService from './../services/noteService';
 import UserContext from '../contexts/UserContext';
+import './NoteList.css';
 
 function NoteList() {
   const { userEmail, userId } = useContext(UserContext);
@@ -73,7 +74,7 @@ function NoteList() {
   };
 
   return (
-    <div>
+    <div className='container'>
       <button onClick={handleAddNote}>Add Note</button>
       {isPopupVisible && (
         <div>
@@ -94,22 +95,27 @@ function NoteList() {
       )}
       <ul>
         {notes.map(note => (
-          <li key={note.noteId} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
-            {note.title}
-            <button onClick={(e) => {
-              e.stopPropagation(); if (note.owner === userId) {
-                deleteNote(note.noteId);
-              } else {
-                alert("Only the owner can delete this note.");
-              }
-            }}>Delete</button>
-          </li>
+    <li key={note.noteId} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
+    <div className="note-container">
+      <div className="note-title-wrapper">
+        <span className="note-title">{note.title}</span>
+      </div>
+      <div className="note-actions">
+        {note.owner === userId && (
+          <button className="delete-button" onClick={(e) => {
+            e.stopPropagation();
+            deleteNote(note.noteId);
+          }}>X</button>
+        )}
+      </div>
+    </div>
+  </li>
         ))}
       </ul>
       {selectedNote ? (
         <Note note={selectedNote} setNote={updateSelectedNote} fetchNotes={fetchNotes} />
       ) : (
-        <p>Select a note to view its content</p>
+        <p>Select a note to view its content here</p>
       )}
     </div>
   );

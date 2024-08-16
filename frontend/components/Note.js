@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import noteService from './../services/noteService';
 import UserContext from '../contexts/UserContext';
+import './Note.css';
 
 const UNINITIALIZED_VALUE = "__UNINITIALIZED__";
 
@@ -36,16 +37,13 @@ function Note({ note, setNote, fetchNotes }) {
   };
 
   useEffect(() => {
-    console.log("note.content", note.content);
-    console.log("last content from server", lastContentFromServerRef.current);
-    
     if (note.content === "" && lastContentFromServerRef.current === UNINITIALIZED_VALUE) {
       return;
     }
 
     if (note.content !== lastContentFromServerRef.current) {
       versionNumberRef.current++;
-      console.log("versionNumberRef.current ", versionNumberRef.current);
+      
       noteService.sendWebSocketMessage(note, socketRef, versionNumberRef);
       lastContentFromServerRef.current = note.content;
     }
@@ -71,7 +69,7 @@ function Note({ note, setNote, fetchNotes }) {
   };
 
   const removeUserByEmail = async (email) => {
-    const noteId = note.noteId;
+    const noteId = note.noteId; 
     if (userId === note.owner || email === userEmail) {
       try {
         await noteService.removeUserByEmail(noteId, email);
@@ -112,10 +110,14 @@ function Note({ note, setNote, fetchNotes }) {
         value={note.content}
         onChange={textAreaOnChange}
       />
-      <button onClick={() => setIsPopupOpen((prev) => !prev)}>Add User</button>
-      <button onClick={() => setIsCollaboratorListVisible(!isCollaboratorListVisible)}>
-        Toggle User List
-      </button>
+        {userId === note.owner && (
+        <>
+          <button onClick={() => setIsPopupOpen((prev) => !prev)}>Add User</button>
+          <button onClick={() => setIsCollaboratorListVisible(!isCollaboratorListVisible)}>
+            Toggle User List
+          </button>
+        </>
+      )}
       {isCollaboratorListVisible && (
         <ul>
           {users.map((user, index) => (

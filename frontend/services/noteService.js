@@ -130,8 +130,6 @@ const initializeWebSocket = (noteId, note, setNote, socketRef, heartbeatInterval
                         ...note,
                         content: data.payload
                     };
-                    console.log("received ", updatedNote.content);
-                    console.log("version", data.version);
 
                     lastContentFromServerRef.current = updatedNote.content;
                     setNote(updatedNote);

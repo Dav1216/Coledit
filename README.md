@@ -29,7 +29,11 @@ This structure enables efficient data management, business logic processing, and
 - **String Merger**: A custom implementation for merging different versions of strings, available in `StringMerger.class`.
 - To understand how this implementation works the StringMergerTest contains explanations and examples.
 
+- **Web Socket Connection Handler**: A websocket handler optimized for collaborative document editing, keeping track for each documents information such as latest version instance and number. 
+- To understand the threading logic you can access the file and read the notes left at backend/src/main/java/com/coledit/backend/handlers/SocketConnectionHandler.java
+
 ## Getting Started
+While in the root of the project you can follow:
 
 ### Development Setup
 To start the application in development mode, run:
@@ -37,10 +41,10 @@ To start the application in development mode, run:
 docker compose -f compose.yml -f compose.dev.yml up --build --watch 
 ```
 
-### Running Tests
-To execute backend tests, use:
+### Deployment Setup
+To start the application in regular mode, run:
 ```zsh
-docker exec -it backend mvn test
+docker compose up
 ```
 
 ### Running Tests
@@ -48,6 +52,8 @@ To execute backend tests, use:
 ```zsh
 docker exec -it backend mvn test
 ```
+
+For the application to work properly, add the /certificates/localhost.crt to trusted certificates on your machine.
 
 You can open two different browsers. To access the frontend of the application enter the following URL in your preferred browsers: https://localhost/
 
@@ -56,6 +62,6 @@ Log in with the provided email addresses and passwords. Use one for each browser
 - **Email**: user1@example.com, **Password**: pass1
 - **Email**: user2@example.com, **Password**: pass2
 
-You can then proceed to experiment with the application as shown in the tutorial video.
+You can then proceed to experiment with the application as you want, or as shown in the tutorial video.
 
 

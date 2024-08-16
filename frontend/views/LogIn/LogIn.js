@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import authenticationService from '../../services/authenticationService';
+import './../AuthFormStyles/Auth.css';
+import Link from 'next/link';
 
 /**
  * Function component for the Login Page.
@@ -53,7 +55,7 @@ export default function LogIn() {
   };
 
   return (
-    <div>
+    <div className="form-container">
       <h2>Sign in to your account</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -92,6 +94,9 @@ export default function LogIn() {
           <button type="submit">Sign in</button>
         </div>
       </form>
+      <p className="alternative-authentication">
+        Do you not have an account? <Link href="/sign-up">Sign up</Link>
+      </p>
     </div>
   );
 }

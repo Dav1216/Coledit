@@ -6,6 +6,7 @@ import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
 import authenticationService from '../../services/authenticationService';
 import UserContext from './../../contexts/UserContext'
+import './Home.css';
 
 function Home() {
   const [userEmail, setUserEmail] = useState(null);
@@ -40,7 +41,7 @@ function Home() {
   };
 
   return (
-    <div>
+    <div className='container'>
       <h1>ColEdit</h1>
       {showLogoutButton && (
         <button onClick={handleLogout}>Log Out</button>
