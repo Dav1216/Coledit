@@ -12,12 +12,7 @@ Coledit follows a Controller-Service-Repository REST architecture pattern,
 which promotes separation of concerns and enhances maintainability.
 This structure enables efficient data management, business logic processing, and request handling, making Coledit scalable and robust.
 
-## Features
-- **Real-Time Collaboration**: Multiple users can edit the same note concurrently.
-- **Conflict Resolution**: Server merges changes in case of conflicts on the same version.
-- **Fast Refresh**: WebSockets enable quick updates on notes.
-- **Security**: Utilizes Spring Security and JWT tokens for secure access.
-- **Technology Stack**:
+**Technology Stack**:
   - Frontend: Next.js
   - Backend: Java
   - Database Interaction: JPA
@@ -25,12 +20,19 @@ This structure enables efficient data management, business logic processing, and
   - Reverse Proxy: Nginx
   - Development & Deployment: Docker Compose
 
+## Features
+- **Real-Time Collaboration**: Multiple users can edit the same note concurrently.
+- **Conflict Resolution**: Server merges changes in case of conflicts on the same version. This is why I have not implemented collaborative visual mouse pointers for all collaborators on a note.
+- **Fast Refresh**: WebSockets enable quick updates on notes.
+- **Spring Security & JWT**: Secure access through Spring Security and JSON Web Tokens (JWT). 
+- **Custom Authorization Filter**: Prevents unauthorized manipulations via `JwtAuthorizationFilter.class`. Ensures actions like note creation/deletion are restricted to the rightful owner even with URL or payload tampering.
+
 ## Custom Implementation
 - **String Merger**: A custom implementation for merging different versions of strings, available in `StringMerger.class`.
 - To understand how this implementation works the StringMergerTest contains explanations and examples.
 
 - **Web Socket Connection Handler**: A websocket handler optimized for collaborative document editing, keeping track for each documents information such as latest version instance and number. 
-- To understand the threading logic you can access the file and read the notes left at backend/src/main/java/com/coledit/backend/handlers/SocketConnectionHandler.java
+- To understand the threading logic you can read the notes left at backend/src/main/java/com/coledit/backend/handlers/SocketConnectionHandler.java
 
 ## Getting Started
 While in the root of the project you can follow:
@@ -65,3 +67,11 @@ Log in with the provided email addresses and passwords. Use one for each browser
 You can then proceed to experiment with the application as you want, or as shown in the tutorial video.
 
 
+
+
+
+
+#### Miscelaneous mentions
+Initially, the application was designed to include roles such as admin, which would allow certain users to add other users. However, roles are no longer utilized in the current implementation, as they did not prove useful.
+
+Some methods in the NoteController, as well as the entire UserController, were found to be unnecessary. Instead of deleting or commenting out these methods, I disabled them using annotations.

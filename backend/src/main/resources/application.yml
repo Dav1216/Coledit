@@ -43,3 +43,11 @@ security:
 
 custom:
   hostname: ${HOSTNAME} # Custom hostname configuration
+
+user:
+  controller:
+    enabled: false
+
+note:
+  controller:
+    enabled: false

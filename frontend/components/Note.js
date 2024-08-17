@@ -5,7 +5,7 @@ import './Note.css';
 
 const UNINITIALIZED_VALUE = "__UNINITIALIZED__";
 
-function Note({ note, setNote, fetchNotes }) {
+function Note({ note, setNote, fetchNotes, setSelectedNote }) {
   const { userEmail, userId } = useContext(UserContext);
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -43,7 +43,7 @@ function Note({ note, setNote, fetchNotes }) {
 
     if (note.content !== lastContentFromServerRef.current) {
       versionNumberRef.current++;
-      
+
       noteService.sendWebSocketMessage(note, socketRef, versionNumberRef);
       lastContentFromServerRef.current = note.content;
     }
@@ -69,8 +69,10 @@ function Note({ note, setNote, fetchNotes }) {
   };
 
   const removeUserByEmail = async (email) => {
-    const noteId = note.noteId; 
+    const noteId = note.noteId;
+
     if (userId === note.owner || email === userEmail) {
+
       try {
         await noteService.removeUserByEmail(noteId, email);
         fetchCollaborators();
@@ -102,7 +104,6 @@ function Note({ note, setNote, fetchNotes }) {
     setIsCollaboratorListVisible(false);
   }
 
-
   return (
     <div className='note'>
       <h2>{note.title}</h2>
@@ -110,11 +111,18 @@ function Note({ note, setNote, fetchNotes }) {
         value={note.content}
         onChange={textAreaOnChange}
       />
-        {userId === note.owner && (
+      {userId === note.owner && (
         <>
           <button onClick={() => setIsPopupOpen((prev) => !prev)}>Add User</button>
           <button onClick={() => setIsCollaboratorListVisible(!isCollaboratorListVisible)}>
             Toggle User List
+          </button>
+        </>
+      )}
+      {userId !== note.owner && (
+        <>
+          <button onClick={() => {handleRemoveOnClick(userEmail);fetchNotes();setSelectedNote(null);}}>
+            Abandon note
           </button>
         </>
       )}

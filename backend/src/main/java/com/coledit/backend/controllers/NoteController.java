@@ -2,6 +2,7 @@ package com.coledit.backend.controllers;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,14 +42,15 @@ public class NoteController {
      * @param note the note to create.
      * @return a ResponseEntity containing the created note.
      */
-    /* 
+    
     @PostMapping("/create")
+    @ConditionalOnProperty(name = "note.controller.enabled", havingValue = "true", matchIfMissing = false)
     public ResponseEntity<NoteDTO> createNote(@RequestBody NoteDTO noteDTO) {
         Note createdNote = noteService.createNote(convertToNote(noteDTO));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
     }
-    */
+    
     
     @PostMapping("/create/{userEmail}")
     public ResponseEntity<NoteDTO> createNoteWithUserEmail(@PathVariable(value = "userEmail") String userEmail, @RequestBody NoteDTO noteDTO) {
@@ -65,6 +67,7 @@ public class NoteController {
      * @return a ResponseEntity containing the note with the specified ID.
      */
     @GetMapping("/get/{id}")
+    @ConditionalOnProperty(name = "note.controller.enabled", havingValue = "true", matchIfMissing = false)
     public ResponseEntity<NoteDTO> getNoteById(@PathVariable(value = "id") String id) {
         Note note = noteService.getNoteById(id);
         if (note != null) {
@@ -80,6 +83,7 @@ public class NoteController {
      * @return a ResponseEntity containing a list of all notes.
      */
     @GetMapping("/getAll")
+    @ConditionalOnProperty(name = "note.controller.enabled", havingValue = "true", matchIfMissing = false)
     public ResponseEntity<List<NoteDTO>> getAllNotes() {
         List<Note> notes = noteService.getAllNotes();
         return ResponseEntity.ok(notes.stream().map(NoteController::convertToNoteDTO).toList());
@@ -93,6 +97,7 @@ public class NoteController {
      * @return a ResponseEntity containing the updated note.
      */
     @PutMapping("/update/{id}")
+    @ConditionalOnProperty(name = "note.controller.enabled", havingValue = "true", matchIfMissing = false)
     public ResponseEntity<NoteDTO> updateNote(@PathVariable(value = "id") String id, @RequestBody NoteDTO newNote) {
         Note updatedNote = noteService.updateNote(id, convertToNote(newNote));
         if (updatedNote != null) {

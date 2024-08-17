@@ -3,6 +3,7 @@ package com.coledit.backend.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,9 @@ import com.coledit.backend.services.UserService;
  */
 @RestController
 @RequestMapping("/user")
+// the application was initally supposed to have roles like admin that could add other users, but now this controller
+// is not used anywhere so it is deactivated
+@ConditionalOnProperty(name = "user.controller.enabled", havingValue = "true", matchIfMissing = false)
 public class UserController {
 
     private final UserService userService;

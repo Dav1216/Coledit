@@ -77,43 +77,46 @@ function NoteList() {
     <div className='container'>
       <button onClick={handleAddNote}>Add Note</button>
       {isPopupVisible && (
-        <div>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmitNoteTitle();
-          }}>
-            <input
-              type="text"
-              placeholder="Enter note title..."
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
-            />
-            <button type="submit">Save</button>
-            <button onClick={handleClosePopup}>Cancel</button>
-          </form>
+        <div className="popup-overlay">
+          <div className="popup-form-container">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmitNoteTitle();
+            }}>
+              <input
+                type="text"
+                placeholder="Enter note title..."
+                value={noteTitle}
+                onChange={(e) => setNoteTitle(e.target.value)}
+              />
+              <button type="submit">Save</button>
+              <button onClick={handleClosePopup}>Cancel</button>
+            </form>
+          </div>
         </div>
       )}
       <ul>
         {notes.map(note => (
-    <li key={note.noteId} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
-    <div className="note-container">
-      <div className="note-title-wrapper">
-        <span className="note-title">{note.title}</span>
-      </div>
-      <div className="note-actions">
-        {note.owner === userId && (
-          <button className="delete-button" onClick={(e) => {
-            e.stopPropagation();
-            deleteNote(note.noteId);
-          }}>X</button>
-        )}
-      </div>
-    </div>
-  </li>
+          <li key={note.noteId} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
+            <div className="note-container">
+              <div className="note-title-wrapper">
+                <span className="note-title">{note.title}</span>
+              </div>
+              <div className="note-actions">
+                {note.owner === userId && (
+                  <button className="delete-button" onClick={(e) => {
+                    e.stopPropagation();
+                    deleteNote(note.noteId);
+                    setSelectedNote(null);
+                  }}>X</button>
+                )}
+              </div>
+            </div>
+          </li>
         ))}
       </ul>
       {selectedNote ? (
-        <Note note={selectedNote} setNote={updateSelectedNote} fetchNotes={fetchNotes} />
+        <Note note={selectedNote} setNote={updateSelectedNote} fetchNotes={fetchNotes} setSelectedNote={setSelectedNote} />
       ) : (
         <p>Select a note to view its content here</p>
       )}

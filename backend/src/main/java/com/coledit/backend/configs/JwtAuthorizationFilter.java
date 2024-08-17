@@ -60,6 +60,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     }
                 }
 
+                // everyone 
                 if ("/note/addCollaborator".equals(requestURI)) {
                     Map<String, String[]> queryParams = request.getParameterMap();
                     String[] noteIds = queryParams.get("noteId");
@@ -71,7 +72,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     }
                     String noteId = noteIds[0];
 
-                    if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
+                    if (!noteService.getNoteById(noteId).getOwner().getEmail().equals(userEmail)) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         return;
                     }
@@ -89,10 +90,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     }
                 }
 
-                if (requestURI.startsWith("/note/get/") || requestURI.startsWith("/note/update/")
-                        || requestURI.startsWith("/note/delete/")) {
+                if (requestURI.startsWith("/note/delete/")) {
                     String noteId = extractPathVarFromRequest(requestURI, 3);
-                    if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
+
+                    if (!noteService.getNoteById(noteId).getOwner().getEmail().equals(userEmail)) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         return;
                     }
@@ -106,10 +107,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     }
                 }
 
+                // originally all users should have been able to see the other collaborators,
+                // but finally the frontend now lets only the owner see them
                 if (requestURI.startsWith("/note/getCollaborators/")) {
                     String noteId = extractPathVarFromRequest(requestURI, 3);
 
-                    if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
+                    if (!userEmail.equals(noteService.getNoteById(noteId).getOwner().getEmail())) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         return;
                     }
@@ -118,24 +121,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 if (requestURI.startsWith("/note/removeCollaborator")) {
                     Map<String, String[]> queryParams = request.getParameterMap();
                     String[] noteIds = queryParams.get("noteId");
-                    String[] userIds = queryParams.get("userEmail");
+                    String[] userEmails = queryParams.get("userEmail");
 
-                    if (noteIds == null || userIds == null || noteIds.length == 0 || userIds.length == 0) {
+                    if (noteIds == null || userEmails == null || noteIds.length == 0 || userEmails.length == 0) {
                         response.setStatus(HttpStatus.BAD_REQUEST.value()); // Missing required parameters
                         return;
                     }
+
                     String noteId = noteIds[0];
+                    String email = userEmails[0];
 
-                    if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
-                        response.setStatus(HttpStatus.FORBIDDEN.value());
-                        return;
-                    }
-                }
-
-                if (requestURI.startsWith("/note/delete")) {
-                    String noteId = extractPathVarFromRequest(requestURI, 3);
-
-                    if (!noteService.isNoteIdAccessiblByUserEmail(noteId, userEmail)) {
+                    if (!userEmail.equals(email) && !userEmail.equals(noteService.getNoteById(noteId).getOwner().getEmail())) {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         return;
                     }
