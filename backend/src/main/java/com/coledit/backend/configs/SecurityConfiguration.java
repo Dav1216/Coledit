@@ -57,7 +57,6 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // Disables CSRF protection
                 .authorizeHttpRequests(auth -> auth
-                        // Developer setup
                         .requestMatchers("/**").permitAll() // Allows requests to /auth/** without authentication
                         .anyRequest().authenticated() // Requires authentication for all other requests
                 )
@@ -102,6 +101,7 @@ public class SecurityConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         // Registers the CORS configuration for all paths
         source.registerCorsConfiguration("/**", configuration);
+        
         return source;
     }
 }

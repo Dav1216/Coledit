@@ -85,6 +85,5 @@ public class AuthenticationService {
 
         return userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + input.getEmail()));
-        
     }
 }

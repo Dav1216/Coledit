@@ -22,7 +22,6 @@ import com.coledit.backend.entities.User;
 import com.coledit.backend.services.NoteService;
 import com.coledit.backend.services.UserService;
 
-
 @RestController
 @RequestMapping("/note")
 public class NoteController {
@@ -42,7 +41,7 @@ public class NoteController {
      * @param note the note to create.
      * @return a ResponseEntity containing the created note.
      */
-    
+
     @PostMapping("/create")
     @ConditionalOnProperty(name = "note.controller.enabled", havingValue = "true", matchIfMissing = false)
     public ResponseEntity<NoteDTO> createNote(@RequestBody NoteDTO noteDTO) {
@@ -50,10 +49,10 @@ public class NoteController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToNoteDTO(createdNote));
     }
-    
-    
+
     @PostMapping("/create/{userEmail}")
-    public ResponseEntity<NoteDTO> createNoteWithUserEmail(@PathVariable(value = "userEmail") String userEmail, @RequestBody NoteDTO noteDTO) {
+    public ResponseEntity<NoteDTO> createNoteWithUserEmail(@PathVariable(value = "userEmail") String userEmail,
+            @RequestBody NoteDTO noteDTO) {
         noteDTO.setOwner(userService.getUserByEmail(userEmail).getUserId());
         Note createdNote = noteService.createNote(convertToNote(noteDTO));
 

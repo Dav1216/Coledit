@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class StringMerger {
-
+    
     public static String mergeVariants(String original, List<String> variants) throws PatchFailedException {
         List<List<Character>> decomposedVariants = variants.stream().map(StringMerger::stringToList)
                 .collect(Collectors.toList());
@@ -37,9 +37,11 @@ public class StringMerger {
 
         List<AbstractDelta<Character>> mergedDeltas = patches.stream().flatMap(patch -> patch.getDeltas().stream())
                 .collect(Collectors.toList());
+                mergedDeltas.stream().forEach(System.out::println);
 
         // Resolve conflicts
         List<AbstractDelta<Character>> resolvedDeltas = resolveConflicts(mergedDeltas);
+        resolvedDeltas.stream().forEach(System.out::println);
 
         // Create a new patch with the resolved deltas
         Patch<Character> mergedPatch = new Patch<>();

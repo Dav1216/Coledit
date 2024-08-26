@@ -15,7 +15,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.TextMessage;
 
-import com.coledit.backend.entities.WSUpdateNotification;
+import com.coledit.backend.dtos.WSUpdateNotification;
 import com.coledit.backend.helpers.StringMerger;
 import com.coledit.backend.services.NoteService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SocketConnectionHandler extends TextWebSocketHandler {
 
     private final Map<String, List<WebSocketSession>> documentSessions = new ConcurrentHashMap<>();
-    
+
     private final Map<String, String> latestDocumentContent = new ConcurrentHashMap<>();
     private final Map<String, List<String>> latestDocumentVariants = new ConcurrentHashMap<>();
     private final Map<String, Integer> documentVersionCounter = new ConcurrentHashMap<>();
@@ -140,7 +140,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
                 String latestMergedVersion = StringMerger.mergeVariants(
                         latestDocumentContent.getOrDefault(documentId, ""),
                         latestVariants);
-        
+
                 // Update the last tracked value of the content to be the merged version.
                 latestDocumentContent.put(documentId, latestMergedVersion);
 
@@ -187,7 +187,6 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
         }
         return null;
     }
-
 
     private void broadcastUpdateNotification(WebSocketSession session, String documentId, String newContent)
             throws IOException {

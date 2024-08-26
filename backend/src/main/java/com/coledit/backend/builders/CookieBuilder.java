@@ -104,14 +104,17 @@ public class CookieBuilder {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Cookie name cannot be null or empty");
         }
+
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(httpOnly);
         cookie.setSecure(secure);
         cookie.setPath(path);
         cookie.setMaxAge(maxAge);
+
         if (sameSite != null && !sameSite.isEmpty()) {
             cookie.setAttribute("SameSite", sameSite);
         }
+        
         return cookie;
     }
 }

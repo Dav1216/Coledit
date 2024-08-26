@@ -46,14 +46,4 @@ public class Note {
   @JoinTable(name = "user_and_note", joinColumns = @JoinColumn(name = "note_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
   @Builder.Default
   private List<User> collaborators = new ArrayList<>();
-
-  @Override
-  public String toString() {
-    return "Note{" +
-        "noteId='" + noteId + '\'' +
-        ", title='" + title + '\'' +
-        ", content='" + content + '\'' +
-        ", ownerUserId='" + owner.getUserId() + '\'' + // Print only userId instead of entire User object
-        '}';
-  }
 }

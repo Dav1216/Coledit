@@ -23,6 +23,4 @@ public interface NoteRepository extends JpaRepository<Note, UUID> {
 
     @Query("SELECT n FROM Note n WHERE :userId MEMBER OF n.collaborators")
     List<Note> findByCollaboratorId(UUID userId);
-
-    
 }
