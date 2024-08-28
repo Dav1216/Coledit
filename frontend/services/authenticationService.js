@@ -46,6 +46,7 @@ const sendSignUpCredentials = async (data) => {
 
 
 const sendLogOutRequest = async () => {
+    sessionStorage.removeItem('reloadCount');
     // Set up the URL and data for the login request
     const url = `https://${process.env.HOSTNAME}/api/auth/logout`;
 

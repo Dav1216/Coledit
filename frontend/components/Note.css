@@ -17,7 +17,6 @@
 
   textarea {
       width: calc(100% - 1.25rem);
-      /* Adjust width to account for padding */
       height: 10rem;
       padding: 0.625rem;
       margin-bottom: 1rem;

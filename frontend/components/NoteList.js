@@ -11,6 +11,7 @@ function NoteList() {
   const [selectedNote, setSelectedNote] = useState(null);
   const [noteTitle, setNoteTitle] = useState('');
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [contextMenu, setContextMenu] = useState({ visible: false, noteId: null });
 
   const fetchNotes = async () => {
     try {
@@ -73,8 +74,41 @@ function NoteList() {
     setIsPopupVisible(false);
   };
 
+
+  // CONTEXT MENU
+
+  const handleContextMenu = (event, note) => { // Added function to handle right-click
+    event.preventDefault();
+    setContextMenu({
+      visible: true,
+      note: note
+    });
+  };
+
+  const handleDeleteNote = () => { // Added function to handle delete action from context menu
+    if (contextMenu.note?.noteId) {
+      deleteNote(contextMenu.note.noteId);
+      setContextMenu({ visible: false, note: null });
+      if (contextMenu.note?.noteId === selectedNote?.noteId) {
+        setSelectedNote(null);
+      }
+    }
+  };
+
+  const handleCloseContextMenu = () => { // Added function to close context menu
+    setContextMenu({ visible: false, noteId: null });
+  };
+
+  useEffect(() => {
+    const reloadCount = Number(sessionStorage.getItem('reloadCount')) || 0;
+    if (reloadCount < 1) {
+      sessionStorage.setItem('reloadCount', String(reloadCount + 1));
+      window.location.reload();
+    }
+  }, []);
+  
   return (
-    <div className='container'>
+    <div className='container' onClick={handleCloseContextMenu}>
       <button onClick={handleAddNote}>Add Note</button>
       {isPopupVisible && (
         <div className="popup-overlay">
@@ -90,36 +124,35 @@ function NoteList() {
                 onChange={(e) => setNoteTitle(e.target.value)}
               />
               <button type="submit">Save</button>
-              <button onClick={handleClosePopup}>Cancel</button>
+              <button type="button" onClick={handleClosePopup}>Cancel</button>
             </form>
           </div>
         </div>
       )}
       <ul>
         {notes.map(note => (
-          <li key={note.noteId} onClick={() => { setSelectedNote(prevSelectedNote => prevSelectedNote === null || prevSelectedNote.noteId !== note.noteId ? note : null); }}>
-            <div className="note-container">
+          <>
+            <li key={note.noteId}
+              onContextMenu={(e) => handleContextMenu(e, note)}
+              onClick={() => {
+                setSelectedNote(prevSelectedNote => prevSelectedNote === null
+                  || prevSelectedNote.noteId !== note.noteId ? note : null);
+              }}>
               <div className="note-title-wrapper">
                 <span className="note-title">{note.title}</span>
               </div>
-              <div className="note-actions">
-                {note.owner === userId && (
-                  <button className="delete-button" onClick={(e) => {
-                    e.stopPropagation();
-                    deleteNote(note.noteId);
-                    setSelectedNote(null);
-                  }}>X</button>
-                )}
+            </li>
+            {(selectedNote?.noteId === note.noteId) && (
+              <Note note={selectedNote} setNote={updateSelectedNote} fetchNotes={fetchNotes} setSelectedNote={setSelectedNote} />
+            )}
+            {contextMenu.visible && note.owner === userId && contextMenu.note.noteId === note.noteId && (
+              <div className="context-menu">
+                <button onClick={handleDeleteNote}>Delete</button>
               </div>
-            </div>
-          </li>
+            )}
+          </>
         ))}
       </ul>
-      {selectedNote ? (
-        <Note note={selectedNote} setNote={updateSelectedNote} fetchNotes={fetchNotes} setSelectedNote={setSelectedNote} />
-      ) : (
-        <p>Select a note to view its content here</p>
-      )}
     </div>
   );
 };

@@ -105,7 +105,7 @@ function Note({ note, setNote, fetchNotes, setSelectedNote }) {
   }
 
   return (
-    <div className='note'>
+    <div className='note' onClick={(e) => e.stopPropagation()}>
       <h2>{note.title}</h2>
       <textarea
         value={note.content}

@@ -36,6 +36,8 @@ public class Note {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID noteId;
   private String title;
+
+  @Column(columnDefinition = "TEXT")
   private String content;
 
   @ManyToOne

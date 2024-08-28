@@ -1,4 +1,4 @@
-package com.coledit.backend.entities;
+package com.coledit.backend.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
