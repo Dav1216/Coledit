@@ -14,7 +14,7 @@ The motivation behind Coledit was to create a seamless and secure mini platform 
 
 Watch the quick start and demo video on YouTube to get up and running quickly:
 
-[Click here to watch the full video on YouTube](https://youtu.be/9jYv1yGno2c?si=c9vxnXclduCuz_Nb)
+[Click here to watch the full video on YouTube](https://youtu.be/MXoi7AwWzCA)
 
 
 ## Architecture
