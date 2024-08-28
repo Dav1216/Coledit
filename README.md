@@ -10,7 +10,11 @@ Docker Compose facilitates both development and deployment environments.
 ## Motivation
 The motivation behind Coledit was to create a seamless and secure mini platform for collaborative note-taking. It aims to provide a simplistic web-based note taking application allowing for small scale collaborative sessions for brainstorming in a single or multi-user environment. It takes out the hassle of overcomplicated and sometimes unresponsive heavy weight apps, with a minimalistic and snappy experience.
 
-## Quick start and demo video
+## Quick Start and Demo Video
+
+Watch the quick start and demo video on YouTube to get up and running quickly:
+
+[Click here to watch the full video on YouTube](https://youtu.be/9jYv1yGno2c?si=c9vxnXclduCuz_Nb)
 
 
 ## Architecture
