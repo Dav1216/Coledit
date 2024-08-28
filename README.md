@@ -73,40 +73,6 @@ Initially, the application was designed to include roles such as admin, which wo
 Some methods in the NoteController, as well as the entire UserController, were found to be unnecessary. Instead of deleting or commenting out these methods, I disabled them using annotations.
 
 
-# In-App Screenshots
+# In-App Screenshot
 
-## Authentication Screens
-
-These screens are part of the initial authentication process, including signing up and logging in.
-
-- **Sign Up**  
-  ![Sign up](screenshots/SignUp.png)
-
-- **Log In**  
-  ![Log in](screenshots/LogIn.png)
-
-## Main Interface
-
-Screens related to the main functionalities once the user is logged in.
-
-- **Home Page**  
-  ![Home page](screenshots/HomePage.png)
-
-- **Owned Note**  
-  ![Owned note](screenshots/OwnedNote.png)
-
-- **Add New Note**  
-  ![Add new note](screenshots/AddNewNote.png)
-
-## Collaboration Features
-
-Screens showing the collaboration features of the application.
-
-- **Add Collaborator**  
-  ![Add collaborator](screenshots/AddCollaboratorToOwnedNote.png)
-
-- **See Collaborators**  
-  ![See collaborators](screenshots/SeeTheCollaboratorsOfYourNote.png)
-
-- **Not Owned Note**  
-  ![Not owned note](screenshots/NotOwnedNote.png)
+![](in-app-ss.png)
